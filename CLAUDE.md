@@ -96,7 +96,7 @@ npm run convex:deploy
 1. **FHA Loan Calculations** (`/src/lib/fha-calculator.ts`):
    - DTI can increase from 43% to 56.99% with compensating factors
    - MIP rates vary by LTV ratio
-   - Interest rates updated daily from MortgageNewsDaily
+   - Interest rates sourced via Convex `rates` module: primary web scraping (MortgageNewsDaily) with xAI fallback, 24h cache, and error logging
 
 2. **Property Tax System** (`/src/lib/property-tax.ts`):
    - xAI Grok analyzes complex exemptions
@@ -434,29 +434,45 @@ transition: background-color 200ms ease;
 
 #### Mortgage Interest Rate Management
 
-**Implementation**: Server-side rate extraction from MortgageNewsDaily
+**Implementation**: Primary web scraping (MortgageNewsDaily) with an xAI fallback. Cron triggers an internal action; DB writes and error logs use internal mutations. Rates are cached for 24h and surfaced via a public query and UI warning if stale or a fallback was used.
 
-**Technical Approach**:
+**Technical Approach (Convex pattern)**:
 ```typescript
-// Convex scheduled function - runs daily at 5PM EST
-export const updateMortgageRates = internalMutation({
+// convex/crons.ts
+crons.daily("update mortgage rates", { hourUTC: 22, minuteUTC: 0 }, internal.rates.updateRateWithScraping);
+
+// convex/rates.ts (simplified)
+export const updateRateWithScraping = internalAction({
+  args: {},
   handler: async (ctx) => {
-    // Server-side fetch of MortgageNewsDaily rates
-    const response = await fetch('https://www.mortgagenewsdaily.com/mortgage-rates/30-year-fha');
-    const html = await response.text();
-    
-    // Parse the FHA rate
-    const fhaRateMatch = html.match(/30\s*Year\s*FHA.*?(\d+\.\d+)%/);
-    if (fhaRateMatch) {
-      const rate = parseFloat(fhaRateMatch[1]);
-      
-      await ctx.db.insert("mortgageRates", {
-        fha30Year: rate,
-        source: "mortgagenewsdaily",
-        lastUpdated: new Date(),
-        isManualOverride: false
-      });
+    const scraping = await scrapeMortgageNewsDaily.handler(); // internalAction
+    if (scraping.success) {
+      await ctx.runMutation(internal.rates.updateRateInDB, { rate: scraping.rate, source: 'mortgagenewsdaily' });
+      return { success: true };
     }
+    // Log, then fallback to xAI
+    await ctx.runMutation(internal.rates.logError, { source: 'mortgagenewsdaily', error: scraping.error ?? 'Unknown', fallbackUsed: true });
+    const xai = await fetchRateFromXAI.handler(); // internalAction
+    if (xai.success) {
+      await ctx.runMutation(internal.rates.updateRateInDB, { rate: xai.rate, source: 'xai' });
+      await ctx.runMutation(internal.rates.logError, { source: 'xai', error: 'Fallback used successfully', fallbackUsed: true, finalResult: { success: true, rate: xai.rate, source: 'xai' } });
+      return { success: true };
+    }
+    // Both failed → log final error
+    await ctx.runMutation(internal.rates.logError, { source: 'xai', error: xai.error ?? 'Unknown', fallbackUsed: true, finalResult: { success: false } });
+    return { success: false };
+  }
+});
+
+// Public query with 24h staleness check
+export const getCurrentFHARate = query({
+  args: {},
+  handler: async (ctx) => {
+    const row = await ctx.db.query('mortgageRates').withIndex('by_type', q => q.eq('rateType', 'fha30')).first();
+    if (!row) return { rate: 7.0, source: 'default', lastUpdated: Date.now(), isStale: true };
+    const isStale = Date.now() - row.lastUpdated > 24 * 60 * 60 * 1000;
+    const wasFallbackUsed = row.source === 'xai' || row.source === 'default';
+    return { rate: row.rate, source: row.source, lastUpdated: row.lastUpdated, isStale, wasFallbackUsed };
   }
 });
 ```
@@ -470,8 +486,12 @@ export const updateMortgageRates = internalMutation({
 **Rate Display**:
 - Show current FHA rate prominently
 - Include "Rate as of [date/time]" disclaimer
-- Link to MortgageNewsDaily source
+- Show source and a banner if xAI fallback was used
 - Warning if rate is >24 hours old
+
+**Operational Notes (2025-08-07 test)**:
+- Manual run of `rates:updateRateWithScraping` returned failure (scrape pattern miss; xAI 404). The public query returned default 7.0 and marked as stale, and errors were logged to `rateUpdateErrors`.
+- Ensure `XAI_API_KEY` is set and consider refining scraping selectors if MortgageNewsDaily markup changes.
 
 ### Feature 2: Property Insurance (Enhanced)
 

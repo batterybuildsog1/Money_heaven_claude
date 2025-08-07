@@ -9,11 +9,11 @@ This directory contains our Convex backend - keep it simple, secure, and type-sa
 ├── auth.config.js      # Clerk authentication config
 ├── crons.ts           # Scheduled functions (cache cleanup, etc.)
 ├── propertyTax.ts     # Property tax cache queries & mutations
-├── rates.ts           # Mortgage rate management
+├── rates.ts           # Mortgage rate management (scraping + xAI fallback)
 ├── scenarios.ts       # User scenario CRUD operations
 ├── schema.ts          # Database schema definitions
 ├── types.ts           # Shared type definitions
-└── xai.ts             # xAI Grok integration actions
+└── xai.ts             # xAI/Groq integrations (property tax)
 ```
 
 ## Core Principles
@@ -21,6 +21,7 @@ This directory contains our Convex backend - keep it simple, secure, and type-sa
 2. **Always authenticate**: Every mutation/query checks user identity (for user data)
 3. **Keep it flat**: No complex relationships or joins needed
 4. **Type safety**: Use Convex validators, avoid `any`
+5. **Follow function roles**: External HTTP in actions; DB writes in mutations; cron calls internal functions
 
 ## Pattern to Follow
 
@@ -104,7 +105,8 @@ const updateData: {
 
 ## What NOT to Do
 - Don't add complex relationships - we don't need them
-- Don't add caching layers - Convex handles this
+- Don't call `fetch` from queries/mutations
+- Don't schedule public functions - use `internal.*`
 - Don't create "service" layers - mutations/queries ARE the service layer
 - Don't add pagination - users won't have thousands of scenarios
 - Don't optimize prematurely - this is fast enough
@@ -113,6 +115,7 @@ const updateData: {
 - `scenarios`: User's saved calculations
 - `mortgageRates`: Daily FHA rate updates
 - `propertyTaxData`: Cached xAI tax analysis responses
+- `rateUpdateErrors`: Error logs for rate update attempts
 
 ## When to Add More Tables
 Only when we have a REAL need:
@@ -127,9 +130,12 @@ Only when we have a REAL need:
 
 ## Testing Convex Functions
 Simple approach for our simple app:
-```typescript
-// In development, test directly in the dashboard
-// For production, add basic integration tests that hit the real endpoints
+```bash
+# Trigger mortgage rate update (scrape + xAI fallback)
+npx convex run rates:updateRateWithScraping
+
+# Read current FHA rate
+npx convex run rates:getCurrentFHARate
 ```
 
 ## Caching Architecture (Added 2025)
