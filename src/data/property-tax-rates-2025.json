@@ -1,0 +1,188 @@
+{
+  "description": "Property tax rates by state and county for 2025",
+  "lastUpdated": "2025-01-01",
+  "sources": ["County Assessor Offices", "State Tax Commissions", "API Ninjas"],
+  "states": {
+    "UT": {
+      "name": "Utah",
+      "averageRate": 0.0055,
+      "medianRate": 0.0051,
+      "residentialExemption": {
+        "type": "percentage",
+        "value": 45,
+        "description": "45% of market value exempt for primary residences (validated 2024)"
+      },
+      "counties": {
+        "Washington County": {
+          "baseRate": 0.0051,
+          "cities": {
+            "Hurricane": 0.007576,
+            "St George": 0.006795,
+            "Washington City": 0.006778
+          }
+        },
+        "Salt Lake County": {
+          "baseRate": 0.0063,
+          "cities": {
+            "Salt Lake City": 0.0067,
+            "West Valley City": 0.0059
+          }
+        },
+        "Utah County": {
+          "baseRate": 0.0057,
+          "cities": {
+            "Provo": 0.0060,
+            "Orem": 0.0055
+          }
+        }
+      },
+      "specialExemptions": {
+        "veteran": {
+          "maxAmount": 521620,
+          "description": "Based on VA disability rating (10-100%)"
+        }
+      }
+    },
+    "AZ": {
+      "name": "Arizona",
+      "averageRate": 0.0081,
+      "residentialExemption": {
+        "type": "dollar",
+        "value": 4748,
+        "description": "Homestead exemption for 2025",
+        "incomeLimit": 38843
+      },
+      "counties": {
+        "Mohave County": {
+          "baseRate": 0.0054,
+          "cities": {
+            "Colorado City": 0.0054
+          }
+        },
+        "Maricopa County": {
+          "baseRate": 0.0091
+        },
+        "Pima County": {
+          "baseRate": 0.0123
+        }
+      }
+    },
+    "NV": {
+      "name": "Nevada",
+      "averageRate": 0.0060,
+      "residentialExemption": {
+        "type": "cap",
+        "value": 3,
+        "description": "3% annual cap on tax increases for primary residences"
+      },
+      "counties": {
+        "Clark County": {
+          "baseRate": 0.0072,
+          "cities": {
+            "Henderson": 0.0072,
+            "Las Vegas": 0.0084
+          }
+        },
+        "Washoe County": {
+          "baseRate": 0.0066
+        }
+      }
+    },
+    "TX": {
+      "name": "Texas",
+      "averageRate": 0.0180,
+      "residentialExemption": {
+        "type": "dollar",
+        "value": 100000,
+        "description": "School tax exemption",
+        "additional": {
+          "senior": 10000,
+          "veteran": 12000
+        }
+      },
+      "counties": {
+        "Harris County": {
+          "baseRate": 0.0203
+        },
+        "Dallas County": {
+          "baseRate": 0.0195
+        },
+        "Travis County": {
+          "baseRate": 0.0181
+        }
+      }
+    },
+    "CA": {
+      "name": "California",
+      "averageRate": 0.0075,
+      "residentialExemption": {
+        "type": "dollar",
+        "value": 7000,
+        "description": "Homeowners exemption"
+      },
+      "counties": {
+        "Los Angeles County": {
+          "baseRate": 0.0078
+        },
+        "San Francisco County": {
+          "baseRate": 0.0068
+        },
+        "Orange County": {
+          "baseRate": 0.0074
+        }
+      }
+    },
+    "FL": {
+      "name": "Florida",
+      "averageRate": 0.0083,
+      "residentialExemption": {
+        "type": "dollar",
+        "value": 50000,
+        "description": "Homestead exemption",
+        "additional": {
+          "senior": 50000
+        }
+      },
+      "counties": {
+        "Miami-Dade County": {
+          "baseRate": 0.0197
+        },
+        "Broward County": {
+          "baseRate": 0.0189
+        },
+        "Orange County": {
+          "baseRate": 0.0105
+        }
+      }
+    }
+  },
+  "specialExemptions": {
+    "veteran": {
+      "states": {
+        "TX": 12000,
+        "FL": 5000,
+        "CA": 4000,
+        "UT": 250000,
+        "AZ": 4748
+      }
+    },
+    "senior": {
+      "states": {
+        "TX": { "amount": 10000, "minAge": 65 },
+        "FL": { "amount": 50000, "minAge": 65 },
+        "CA": { "amount": 0, "minAge": 65 },
+        "UT": { "amount": 0, "minAge": 65 },
+        "AZ": { "amount": 0, "minAge": 65 }
+      }
+    },
+    "disability": {
+      "states": {
+        "TX": 10000,
+        "FL": 500,
+        "CA": 0,
+        "UT": 0,
+        "AZ": 0
+      }
+    }
+  }
+}

@@ -1,102 +1,311 @@
-import Image from "next/image";
+import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
+import Link from 'next/link';
+import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen gradient-dark">
+      {/* Header */}
+      <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="p-2 gradient-purple rounded-lg">
+                <HomeIcon className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-white">MoneyBucket</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" className="text-slate-300 hover:text-white">
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button className="gradient-purple hover:opacity-90 text-white">
+                    Sign Up
+                  </Button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/calculator">
+                  <Button className="gradient-purple hover:opacity-90 text-white mr-4">Go to Calculator</Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative py-16 lg:py-24 overflow-hidden">
+        {/* Background Image Effect */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900/80" />
+          <img 
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop" 
+            alt="Modern house"
+            className="absolute right-0 top-0 h-full w-full lg:w-2/3 object-cover opacity-30"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="text-white">Buy the house </span>
+              <span className="gradient-purple-text">they said<br />you couldn&apos;t.</span>
+            </h2>
+            <p className="text-xl lg:text-2xl text-slate-300 mb-8 leading-relaxed">
+              Our FHA calculator helps you achieve homeownership, even when others say it&apos;s impossible.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple">
+                    Sign Up for Free
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/calculator">
+                  <Button size="lg" className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple">
+                    Start Calculating
+                    <Calculator className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </SignedIn>
+            </div>
+
+            {/* Key Features */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="text-slate-300">Maximize your mortgage approval up to 56.99% DTI</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="text-slate-300">Find compensating factors that boost your borrowing power</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="text-slate-300">Get approved when traditional lenders say no</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section className="py-16 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              See how much <span className="gradient-purple-text">more house</span> you can afford
+            </h3>
+          </div>
+          
+          {/* Interactive Comparison */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-slate-800 rounded-2xl p-8 shadow-dark-xl border border-slate-700">
+              <div className="text-center mb-8">
+                <p className="text-slate-400 mb-4">Based on $100,000 annual income</p>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="text-center p-6 bg-slate-900/50 rounded-xl">
+                  <p className="text-slate-400 mb-2">Standard Lenders</p>
+                  <p className="text-4xl font-bold text-slate-500">$326,077</p>
+                  <p className="text-sm text-slate-500 mt-2">Max home price</p>
+                </div>
+                
+                <div className="text-center p-6 bg-purple-900/20 rounded-xl border border-purple-800/30">
+                  <p className="text-purple-400 mb-2">With MoneyBucket</p>
+                  <p className="text-4xl font-bold gradient-purple-text">$417,481</p>
+                  <p className="text-sm text-green-400 mt-2">↑ 28% more buying power</p>
+                </div>
+              </div>
+              
+              <div className="mt-8 flex justify-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 rounded-full">
+                  <CheckCircle className="h-5 w-5 text-green-400" />
+                  <span className="text-green-400">Standard mortgage approval</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Proposition */}
+      <section className="py-20 bg-slate-800">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Why Choose Our Calculator?
+            </h3>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+              Unlike basic calculators, we factor in real FHA guidelines and compensating factors to give you the most accurate borrowing power estimate.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <Card className="p-8 text-center bg-slate-900 border-slate-700 hover:border-purple-800 transition-all hover:shadow-dark-xl">
+              <div className="w-16 h-16 gradient-purple rounded-full flex items-center justify-center mx-auto mb-6">
+                <Calculator className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-semibold mb-4 text-white">Advanced FHA Calculations</h4>
+              <p className="text-slate-400 mb-4">
+                Real FHA loan limits, MIP calculations, and DTI ratios based on current lending standards.
+              </p>
+              <ul className="text-sm text-slate-500 space-y-1">
+                <li>✓ County-specific FHA limits</li>
+                <li>✓ Accurate MIP calculations</li>
+                <li>✓ Property tax estimates</li>
+                <li>✓ Insurance estimates</li>
+              </ul>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card className="p-8 text-center bg-slate-900 border-slate-700 hover:border-green-800 transition-all hover:shadow-dark-xl">
+              <div className="w-16 h-16 gradient-green rounded-full flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-semibold mb-4 text-white">DTI Enhancement</h4>
+              <p className="text-slate-400 mb-4">
+                Boost your DTI from 43% to 56.99% with compensating factors that other calculators ignore.
+              </p>
+              <ul className="text-sm text-slate-500 space-y-1">
+                <li>✓ Cash reserves evaluation</li>
+                <li>✓ Credit score bonuses</li>
+                <li>✓ Employment stability factors</li>
+                <li>✓ Down payment benefits</li>
+              </ul>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card className="p-8 text-center bg-slate-900 border-slate-700 hover:border-blue-800 transition-all hover:shadow-dark-xl">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-semibold mb-4 text-white">Save & Compare</h4>
+              <p className="text-slate-400 mb-4">
+                Save multiple scenarios and compare different down payments, locations, and income levels.
+              </p>
+              <ul className="text-sm text-slate-500 space-y-1">
+                <li>✓ Multiple saved scenarios</li>
+                <li>✓ Quick comparison tools</li>
+                <li>✓ Export calculations</li>
+                <li>✓ Secure cloud storage</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              How It Works
+            </h3>
+            <p className="text-xl text-slate-400">
+              Get your results in 3 simple steps
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 gradient-purple text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-dark-lg">
+                1
+              </div>
+              <h4 className="text-xl font-semibold mb-2 text-white">Enter Your Information</h4>
+              <p className="text-slate-400">
+                Income, credit score, location, down payment, and monthly debts
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 gradient-green text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-dark-lg">
+                2
+              </div>
+              <h4 className="text-xl font-semibold mb-2 text-white">Optimize Your DTI</h4>
+              <p className="text-slate-400">
+                Add compensating factors to increase your borrowing capacity
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-dark-lg">
+                3
+              </div>
+              <h4 className="text-xl font-semibold mb-2 text-white">Get Your Results</h4>
+              <p className="text-slate-400">
+                See your maximum loan amount, monthly payments, and save scenarios
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 gradient-purple text-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h3 className="text-3xl lg:text-4xl font-bold mb-4">
+            Ready to Discover Your True Borrowing Power?
+          </h3>
+          <p className="text-xl mb-8 opacity-90">
+            Join thousands of home buyers who have used our calculator to maximize their loan amount.
+          </p>
+          
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          
+          <SignedIn>
+            <Link href="/calculator">
+              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
+                Start Calculating Now
+                <Calculator className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </SignedIn>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 text-white py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center gap-3 mb-4 md:mb-0">
+              <div className="p-2 gradient-purple rounded-lg">
+                <HomeIcon className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-semibold">MoneyBucket</span>
+            </div>
+            <div className="text-sm text-slate-400">
+              <p>© 2025 MoneyBucket. Educational tool only.</p>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
