@@ -925,10 +925,21 @@ XAI_API_KEY=your-xai-key
 
 ## Deployment Process
 
+**⚠️ CRITICAL: NEVER use `vercel --prod` - it breaks authentication!**
+
+### Correct Deployment Method:
 1. **Test locally**: `npm run dev` + `npx convex dev`
 2. **Deploy Convex**: `npx convex deploy --yes`
-3. **Deploy Vercel**: `vercel --prod --yes`
+3. **Deploy Vercel**: 
+   - **Preferred**: `git push` (auto-deploys via GitHub)
+   - **Alternative**: `vercel` for preview, then promote if needed
 4. **Verify**: Check https://moneyheavenclaude.vercel.app
+
+### Why `vercel --prod` Breaks Auth:
+- Creates duplicate deployments with different URLs
+- Auth callbacks are tied to specific URLs
+- Cookie domains get confused between deployments
+- Always check existing deployment first with `vercel ls`
 
 ## Maintenance Notes
 
