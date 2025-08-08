@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card } from "../../components/ui/card";
 import { Slider } from "../../components/ui/slider";
-import { UserButton } from '@clerk/nextjs';
+import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
 import Link from 'next/link';
 import { WizardStep } from "../../components/calculator/WizardStep";
 import { CalculationSidebar } from "../../components/calculator/CalculationSidebar";
@@ -29,6 +29,9 @@ import {
 import { getRegionFromStateAbbr } from "../../lib/regions";
 
 export default function CalculatorPage() {
+  const token = useAuthToken();
+  const isAuthenticated = !!token;
+  const { signOut, signIn } = useAuthActions();
   const { create: createScenario } = useScenarios();
   const {
     userInputs,
@@ -143,7 +146,21 @@ export default function CalculatorPage() {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              {typeof window !== 'undefined' && <UserButton afterSignOutUrl="/" />}
+              {isAuthenticated ? (
+                <button
+                  className="text-slate-300 hover:text-white underline"
+                  onClick={() => void signOut()}
+                >
+                  Sign out
+                </button>
+              ) : (
+                <button
+                  className="text-slate-300 hover:text-white underline"
+                  onClick={() => void signIn("google")}
+                >
+                  Sign in
+                </button>
+              )}
             </div>
           </div>
         </div>

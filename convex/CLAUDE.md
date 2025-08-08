@@ -6,13 +6,14 @@ This directory contains our Convex backend - keep it simple, secure, and type-sa
 ```
 /convex
 ├── _generated/         # Auto-generated Convex files (don't edit)
-├── auth.config.js      # Clerk authentication config
+├── auth.config.ts      # Convex Auth configuration
 ├── crons.ts           # Scheduled functions (cache cleanup, etc.)
 ├── propertyTax.ts     # Property tax cache queries & mutations
 ├── rates.ts           # Mortgage rate management (scraping + xAI fallback)
 ├── scenarios.ts       # User scenario CRUD operations
 ├── schema.ts          # Database schema definitions
 ├── types.ts           # Shared type definitions
+├── auth.ts            # Auth functions and exports
 └── xai.ts             # xAI/Groq integrations (property tax)
 ```
 
@@ -69,10 +70,12 @@ export const scenarioResults = v.object({
 Then use in both schema.ts and scenarios.ts to avoid duplication.
 
 ### 2. Authentication Pattern
-Keep the current pattern - it's perfect:
+Using Convex Auth:
 ```typescript
-const identity = await ctx.auth.getUserIdentity();
-if (!identity) {
+import { getAuthUserId } from "@convex-dev/auth/server";
+
+const userId = await getAuthUserId(ctx);
+if (!userId) {
   throw new Error("Not authenticated");
 }
 ```
@@ -81,7 +84,7 @@ if (!identity) {
 Always check ownership:
 ```typescript
 const scenario = await ctx.db.get(args.id);
-if (!scenario || scenario.userId !== identity.subject) {
+if (!scenario || scenario.userId !== userId) {
   throw new Error("Scenario not found or access denied");
 }
 ```

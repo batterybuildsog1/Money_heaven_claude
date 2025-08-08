@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { scenarioInputs, scenarioFactors, scenarioResults } from "./types";
 
 // Helper function to migrate old scenarios with dollar-based down payments
@@ -41,15 +42,15 @@ export const create = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
     const now = Date.now();
     
     return await ctx.db.insert("scenarios", {
-      userId: identity.subject,
+      userId,
       inputs: args.inputs,
       compensatingFactors: args.compensatingFactors,
       results: args.results,
@@ -71,13 +72,13 @@ export const update = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
     const scenario = await ctx.db.get(args.id);
-    if (!scenario || scenario.userId !== identity.subject) {
+    if (!scenario || scenario.userId !== userId) {
       throw new Error("Scenario not found or access denied");
     }
 
@@ -105,13 +106,13 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("scenarios") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
     const scenario = await ctx.db.get(args.id);
-    if (!scenario || scenario.userId !== identity.subject) {
+    if (!scenario || scenario.userId !== userId) {
       throw new Error("Scenario not found or access denied");
     }
 
@@ -121,14 +122,14 @@ export const remove = mutation({
 
 export const list = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return [];
     }
 
     const scenarios = await ctx.db
       .query("scenarios")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
     
@@ -140,13 +141,13 @@ export const list = query({
 export const get = query({
   args: { id: v.id("scenarios") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return null;
     }
 
     const scenario = await ctx.db.get(args.id);
-    if (!scenario || scenario.userId !== identity.subject) {
+    if (!scenario || scenario.userId !== userId) {
       return null;
     }
 

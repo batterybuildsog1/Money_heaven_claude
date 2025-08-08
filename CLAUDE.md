@@ -40,7 +40,7 @@ npm run convex:deploy
 - **Frontend**: Next.js 15 with App Router, React 19, TypeScript
 - **State Management**: Zustand (single store at `/src/store/calculator.ts`)
 - **Backend**: Convex (serverless functions with real-time updates)
-- **Authentication**: Clerk (integrated with Convex)
+- **Authentication**: Convex Auth (OAuth providers)
 - **UI Components**: shadcn/ui (copied components, not installed package)
 - **Styling**: Tailwind CSS v4 (NO @apply directives, NO arbitrary values)
 - **External APIs**: 
@@ -65,7 +65,7 @@ npm run convex:deploy
 3. **Convex Backend**:
    - Schema defined in `/convex/schema.ts`
    - Scenario CRUD operations in `/convex/scenarios.ts`
-   - Authentication via Clerk integration
+   - Authentication via Convex Auth
    - All queries/mutations filtered by userId
 
 4. **API Routes**:
@@ -606,7 +606,7 @@ const riskMultipliers = {
 Simple, secure user authentication with scenario saving using Clerk + Convex.
 
 **Authentication Flow**:
-1. **Landing Page**: Sign In/Up buttons using Clerk components
+1. **Landing Page**: Sign In/Up buttons using Convex Auth hooks
 2. **Protected Routes**: Calculator requires authentication
 3. **User Identity**: Stored as `userId` in all saved data
 
@@ -650,7 +650,7 @@ interface Scenario {
 **Security**:
 - All queries filtered by authenticated userId
 - No cross-user data access
-- Clerk handles all auth complexity
+- Convex Auth handles OAuth flow
 - Session management automatic
 
 ### Feature 4: DTI Calculator Logic
@@ -891,10 +891,13 @@ Clean, linear progression from landing to results.
 
 **IMPORTANT: Never commit API keys to version control. Store them in `.env.local` (development) or your deployment platform's environment variables (production).**
 
-#### Clerk Authentication
+#### Convex Auth (OAuth Providers)
 ```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your-clerk-publishable-key>
-CLERK_SECRET_KEY=<your-clerk-secret-key>
+# Set these in Convex dashboard environment variables:
+AUTH_GOOGLE_ID=<your-google-oauth-id>
+AUTH_GOOGLE_SECRET=<your-google-oauth-secret>
+AUTH_GITHUB_ID=<your-github-oauth-id>  # Optional
+AUTH_GITHUB_SECRET=<your-github-oauth-secret>  # Optional
 ```
 
 #### xAI Grok API
@@ -915,10 +918,10 @@ CONVEX_DEPLOYMENT=<your-convex-deployment>
 ```
 
 **Setup Instructions:**
-1. Create accounts at clerk.com and x.ai
-2. Generate production API keys (not test keys)
-3. Store keys securely in environment variables
-4. Never expose keys in client-side code or logs
+1. Create OAuth applications on Google Cloud Console (and optionally GitHub)
+2. Generate production OAuth credentials
+3. Store credentials securely in Convex environment variables
+4. Never expose secrets in client-side code or logs
 
 ## Development Commands
 

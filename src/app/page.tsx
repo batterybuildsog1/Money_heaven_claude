@@ -1,4 +1,5 @@
-import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
+"use client";
+import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
@@ -6,6 +7,9 @@ import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 
 export default function Home() {
+  const token = useAuthToken();
+  const isAuthenticated = !!token;
+  const { signIn, signOut } = useAuthActions();
   return (
     <div className="min-h-screen gradient-dark">
       {/* Header */}
@@ -19,24 +23,30 @@ export default function Home() {
               <h1 className="text-xl font-bold text-white">MoneyBucket</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" className="text-slate-300 hover:text-white">
+              {!isAuthenticated ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    className="text-slate-300 hover:text-white"
+                    onClick={() => void signIn("google")}
+                  >
                     Sign In
                   </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button className="gradient-purple hover:opacity-90 text-white">
+                  <Button
+                    className="gradient-purple hover:opacity-90 text-white"
+                    onClick={() => void signIn("google")}
+                  >
                     Sign Up
                   </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Link href="/calculator">
-                  <Button className="gradient-purple hover:opacity-90 text-white mr-4">Go to Calculator</Button>
-                </Link>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
+                </>
+              ) : (
+                <>
+                  <Link href="/calculator">
+                    <Button className="gradient-purple hover:opacity-90 text-white mr-4">Go to Calculator</Button>
+                  </Link>
+                  <Button variant="outline" onClick={() => void signOut()}>Sign out</Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -67,22 +77,23 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <SignedOut>
-                <SignUpButton mode="modal">
-                  <Button size="lg" className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple">
-                    Sign Up for Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
+              {!isAuthenticated ? (
+                <Button
+                  size="lg"
+                  className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple"
+                  onClick={() => void signIn("google")}
+                >
+                  Sign Up for Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              ) : (
                 <Link href="/calculator">
                   <Button size="lg" className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple">
                     Start Calculating
                     <Calculator className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-              </SignedIn>
+              )}
             </div>
 
             {/* Key Features */}
@@ -274,23 +285,19 @@ export default function Home() {
             Join thousands of home buyers who have used our calculator to maximize their loan amount.
           </p>
           
-          <SignedOut>
-            <SignUpButton mode="modal">
-              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </SignUpButton>
-          </SignedOut>
-          
-          <SignedIn>
+          {!isAuthenticated ? (
+            <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google")}>
+              Get Started Free
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          ) : (
             <Link href="/calculator">
               <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
                 Start Calculating Now
                 <Calculator className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-          </SignedIn>
+          )}
         </div>
       </section>
 

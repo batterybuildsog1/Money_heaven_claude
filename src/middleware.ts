@@ -1,22 +1,26 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { convexAuthNextjsMiddleware, createRouteMatcher, nextjsMiddlewareRedirect } from "@convex-dev/auth/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/calculator(.*)',
-  '/scenarios(.*)',
+  "/dashboard(.*)",
+  "/calculator(.*)",
+  "/scenarios(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+  // Allow public routes to pass through
+  if (!isProtectedRoute(request)) {
+    return;
   }
+  // For protected routes, require authentication
+  if (await convexAuth.isAuthenticated()) {
+    return;
+  }
+  return nextjsMiddlewareRedirect(request, "/");
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|.*\\..*).*)",
+    "/(api)(.*)",
   ],
 };
