@@ -12,8 +12,12 @@
 npx convex deploy --yes
 
 # 2. Deploy Frontend to Vercel
-vercel --prod --yes
+git push    # Triggers auto-deployment via GitHub integration
+# OR for manual deployment (avoid this):
+vercel      # Creates preview, then promote if needed
 ```
+
+**⚠️ NEVER use `vercel --prod` - it breaks authentication!**
 
 ## Environment Variables
 
@@ -32,7 +36,15 @@ GROQ_API_KEY           # Groq API key
 ```
 
 ### Vercel (Set via Dashboard)
+
+**🚨 CRITICAL CONFIGURATION:**
+- `CONVEX_DEPLOY_KEY` must ONLY be enabled for **Production** environment!
+  - ❌ Uncheck Development
+  - ❌ Uncheck Preview  
+  - ✅ Check Production only
+
 ```
+CONVEX_DEPLOY_KEY        # Production deploy key (PRODUCTION ONLY!)
 NEXT_PUBLIC_CONVEX_URL   # https://calm-ibis-514.convex.cloud
 API_NINJAS_KEY          # API Ninjas key
 GROQ_API_KEY            # Groq API key
@@ -63,6 +75,17 @@ XAI_API_KEY             # xAI API key
 - Ensure SITE_URL matches your Vercel deployment
 
 ### Deployment Errors
+
+#### "Non-production build environment" Error
+If you see: `Detected a non-production build environment and "CONVEX_DEPLOY_KEY" for a production Convex deployment`
+
+**Fix**: In Vercel Dashboard → Settings → Environment Variables
+1. Edit `CONVEX_DEPLOY_KEY`
+2. Uncheck Development and Preview
+3. Keep only Production checked
+4. Save and redeploy
+
+#### Other Issues
 - If Convex deploy fails, check `npx convex logs` for errors
 - For Vercel issues, check build logs at https://vercel.com/alan-sunhomesios-projects/moneyheavenclaude
 
