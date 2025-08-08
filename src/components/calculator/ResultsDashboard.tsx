@@ -175,6 +175,11 @@ export function ResultsDashboard({
           <div className="text-lg text-gray-600">
             Maximum Home Price: {formatCurrency(results.maxHomePrice || 0)}
           </div>
+          {results.downPaymentAmount && (
+            <div className="text-base text-gray-600 mt-1">
+              Down Payment Required: {formatCurrency(results.downPaymentAmount)}
+            </div>
+          )}
           {results.loanProgram && (
             <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200">
               {results.loanProgram} Loan

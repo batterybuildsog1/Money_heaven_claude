@@ -3,6 +3,7 @@
  * Implements FHA compensating factors that can increase the maximum DTI ratio
  */
 
+import { getResidualIncomeThreshold } from './residualIncomeTable';
 export interface CompensatingFactor {
   id: string;
   name: string;
@@ -48,6 +49,9 @@ export interface DTICalculationResult {
   activeFactors: CompensatingFactor[];
   progressPercentage: number;
   remainingCapacity: number;
+  // AUS simulation metadata
+  ausModeApplied?: boolean;
+  ausFrontierDTI?: number;
 }
 
 // DTI compensating factor definitions
@@ -75,8 +79,8 @@ export const COMPENSATING_FACTORS: Record<string, Omit<CompensatingFactor, 'isAc
   },
   noDiscretionaryDebt: {
     id: 'noDiscretionaryDebt',
-    name: 'No Discretionary Debt',
-    description: 'Borrower has little to no discretionary debt',
+    name: 'Low Revolving Balances',
+    description: 'Credit card utilization under ~10% and limited non-essential payments',
     dtiIncrease: 0.02,
     category: 'financial'
   },
@@ -149,12 +153,25 @@ export function evaluateMinimalPaymentIncrease(
 export function evaluateResidualIncome(
   monthlyIncome: number,
   totalMonthlyObligations: number,
-  familySize: number = 1
+  familySize: number = 1,
+  options?: {
+    monthlyTaxes?: number;
+    childcareExpense?: number;
+    region?: 'Northeast' | 'Midwest' | 'South' | 'West';
+  }
 ): { residualAmount: number; qualifies: boolean } {
-  const residualAmount = monthlyIncome - totalMonthlyObligations;
-  
-  // FHA residual income guidelines (simplified - varies by region and family size)
-  const minResidualIncome = getMinResidualIncome(familySize);
+  const taxes = options?.monthlyTaxes || 0;
+  const childcare = options?.childcareExpense || 0;
+  // Residual = gross income - taxes - obligations - childcare (simple, conservative)
+  const residualAmount = monthlyIncome - taxes - totalMonthlyObligations - childcare;
+
+  // Use region table when provided, otherwise fallback to simplified threshold
+  let minResidualIncome: number;
+  if (options?.region) {
+    minResidualIncome = getResidualIncomeThreshold(options.region, familySize);
+  } else {
+    minResidualIncome = getMinResidualIncome(familySize);
+  }
   const qualifies = residualAmount >= minResidualIncome;
   
   return { residualAmount: Math.round(residualAmount), qualifies };
@@ -213,7 +230,14 @@ export function calculateDTIFactors(
   newMortgagePayment: number,
   ficoScore: number,
   downPaymentPercent: number,
-  familySize: number = 1
+  familySize: number = 1,
+  opts?: {
+    ausMode?: boolean;
+    positiveRentHistory?: boolean;
+    monthlyTaxes?: number;
+    childcareExpense?: number;
+    region?: 'Northeast' | 'Midwest' | 'South' | 'West';
+  }
 ): DTICalculationResult {
   const activeFactors: CompensatingFactor[] = [];
   const monthlyIncome = income / 12;
@@ -235,7 +259,12 @@ export function calculateDTIFactors(
     });
   }
   
-  const residualIncomeResult = evaluateResidualIncome(monthlyIncome, totalMonthlyDebts + newMortgagePayment, familySize);
+  const residualIncomeResult = evaluateResidualIncome(
+    monthlyIncome,
+    totalMonthlyDebts + newMortgagePayment,
+    familySize,
+    { monthlyTaxes: opts?.monthlyTaxes, childcareExpense: opts?.childcareExpense, region: opts?.region }
+  );
   if (residualIncomeResult.qualifies) {
     activeFactors.push({
       ...COMPENSATING_FACTORS.residualIncome,
@@ -268,15 +297,35 @@ export function calculateDTIFactors(
   }
   
   // Calculate total increase (capped at maximum)
-  const totalIncrease = Math.min(
-    activeFactors.reduce((sum, factor) => sum + factor.dtiIncrease, 0),
-    DTI_CONSTANTS.maxTotalIncrease
-  );
+  const rawIncrease = activeFactors.reduce((sum, factor) => sum + factor.dtiIncrease, 0);
+  const totalIncrease = Math.min(rawIncrease, DTI_CONSTANTS.maxTotalIncrease);
   
-  const maxAllowedDTI = Math.min(
-    DTI_CONSTANTS.baseDTI + totalIncrease,
-    DTI_CONSTANTS.maxDTIWithFactors
-  );
+  // AUS frontier model (conservative, transparent heuristic)
+  let ausFrontierDTI = 0.45; // 45% baseline
+  if (opts?.ausMode) {
+    // Score signals
+    const reservesMonths = newMortgagePayment > 0 ? reserves / newMortgagePayment : 0;
+    const paymentShockPercent = currentHousingPayment > 0
+      ? ((newMortgagePayment - currentHousingPayment) / currentHousingPayment) * 100
+      : 999;
+    let signalPoints = 0;
+    if (reservesMonths >= 3) signalPoints += reservesMonths >= 6 ? 2 : 1;
+    if (paymentShockPercent <= 5) signalPoints += paymentShockPercent <= 0 ? 2 : 1;
+    if (opts?.positiveRentHistory) signalPoints += 1;
+    if (residualIncomeResult.qualifies) signalPoints += 1;
+    if (ficoScore >= DTI_CONSTANTS.minHighFICO) signalPoints += 1;
+    if (downPaymentPercent >= DTI_CONSTANTS.minLargeDownPayment) signalPoints += 0.5;
+    const discretionaryDebtResult = evaluateDiscretionaryDebt(totalMonthlyDebts, necessaryDebts);
+    if (discretionaryDebtResult.qualifies) signalPoints += 0.5;
+    
+    if (signalPoints >= 3) ausFrontierDTI = 0.50;
+    if (signalPoints >= 5) ausFrontierDTI = DTI_CONSTANTS.maxDTIWithFactors; // up to 56.99%
+  }
+  
+  // Combine additive model with AUS frontier cap when AUS mode
+  const additiveDTI = DTI_CONSTANTS.baseDTI + totalIncrease;
+  const cappedByAdditive = Math.min(additiveDTI, DTI_CONSTANTS.maxDTIWithFactors);
+  const maxAllowedDTI = opts?.ausMode ? Math.min(cappedByAdditive, ausFrontierDTI) : cappedByAdditive;
   
   // Calculate progress percentage (0% to 100%)
   const progressPercentage = (totalIncrease / DTI_CONSTANTS.maxTotalIncrease) * 100;
@@ -290,7 +339,9 @@ export function calculateDTIFactors(
     maxAllowedDTI: Math.round(maxAllowedDTI * 10000) / 10000,
     activeFactors,
     progressPercentage: Math.round(progressPercentage * 100) / 100,
-    remainingCapacity: Math.round(remainingCapacity * 10000) / 10000
+    remainingCapacity: Math.round(remainingCapacity * 10000) / 10000,
+    ausModeApplied: !!opts?.ausMode,
+    ausFrontierDTI: opts?.ausMode ? Math.round(ausFrontierDTI * 10000) / 10000 : undefined
   };
 }
 

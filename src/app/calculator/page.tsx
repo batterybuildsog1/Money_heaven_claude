@@ -26,6 +26,7 @@ import {
   FileText,
   Home
 } from "lucide-react";
+import { getRegionFromStateAbbr } from "../../lib/regions";
 
 export default function CalculatorPage() {
   const { create: createScenario } = useScenarios();
@@ -446,13 +447,25 @@ export default function CalculatorPage() {
                     isValid={true}
                     showResults={isCalculating}
                   >
-                    {dtiProgressData ? (
+                      {dtiProgressData ? (
                       <DTIEnhancement
                         currentDTI={dtiProgressData.currentDTI}
                         maxAllowedDTI={dtiProgressData.maxDTI}
                         activeFactors={dtiProgressData.activeFactors}
-                        compensatingFactors={compensatingFactors}
+                        compensatingFactors={{
+                          ...compensatingFactors,
+                          projectedMonthlyPayment: results.totalMonthlyPayment || 0
+                        }}
                         onUpdateFactors={updateCompensatingFactors}
+                          onUpdateUserInputs={updateUserInputs}
+                          grossMonthlyIncome={(userInputs.income || 0) / 12}
+                          regionLabel={(() => {
+                            // Prefer parsing state from the enriched location string (zip, county, ST)
+                            const abbr = userInputs.location?.match(/\b([A-Z]{2})\b/)
+                            return getRegionFromStateAbbr(abbr?.[1] || undefined)
+                          })() || undefined}
+                          totalMonthlyDebts={userInputs.monthlyDebts || 0}
+                          dollarsPerDtiPercent={dtiProgressData?.dollarsPerDtiPercent}
                       />
                     ) : (
                       <div className="text-center py-8 text-slate-400">
@@ -460,6 +473,12 @@ export default function CalculatorPage() {
                         <p>Complete previous steps to see DTI enhancement options</p>
                       </div>
                     )}
+                     {/* AUS advisory banner when DTI > 50% */}
+                     {results.debtToIncomeRatio && results.debtToIncomeRatio > 50 && (
+                       <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-500/10 p-4 text-amber-300">
+                         Above 50% DTI typically requires AUS approval. Our 50–56.99% DTI is an estimate; consult a loan officer for exact limits.
+                       </div>
+                     )}
                   </WizardStep>
                 )}
               </>

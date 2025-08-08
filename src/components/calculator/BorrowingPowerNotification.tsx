@@ -29,7 +29,7 @@ export function BorrowingPowerNotification({
     // Hide after animation completes
     const hideTimeout = setTimeout(() => {
       setIsVisible(false)
-    }, 3000)
+    }, 4500)
 
     return () => {
       clearTimeout(timeout)
@@ -42,8 +42,8 @@ export function BorrowingPowerNotification({
   return (
     <div
       className={cn(
-        "fixed z-50 pointer-events-none transition-all duration-1000 transform",
-        isAnimating ? "translate-y-[-100px] opacity-0" : "translate-y-0 opacity-100"
+        "fixed z-50 pointer-events-none transition-all duration-[1500ms] transform",
+        isAnimating ? "translate-y-[-120px] opacity-0" : "translate-y-0 opacity-100"
       )}
       style={{
         top: "50%",
@@ -59,9 +59,9 @@ export function BorrowingPowerNotification({
       )}>
         <div className="flex items-center gap-3">
           {direction === 'increase' ? (
-            <TrendingUp className="h-8 w-8 animate-bounce" />
+            <TrendingUp className="h-8 w-8 animate-pulse" />
           ) : (
-            <TrendingDown className="h-8 w-8 animate-bounce" />
+            <TrendingDown className="h-8 w-8 animate-pulse" />
           )}
           <div>
             <div className="text-3xl font-bold">

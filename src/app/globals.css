@@ -320,7 +320,7 @@
     }
     100% {
       opacity: 0;
-      transform: translate(-50%, -60px);
+      transform: translate(-50%, -80px);
     }
   }
 

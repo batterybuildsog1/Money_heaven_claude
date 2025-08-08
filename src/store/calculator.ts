@@ -6,6 +6,7 @@ import { getPropertyTaxInfo, getMonthlyPropertyTax } from '../lib/property-tax';
 import { estimateHomeownersInsurance, getMonthlyInsurancePayment, getStateRiskFactors } from '../lib/insurance';
 import { getEnhancedInsuranceEstimate } from '../lib/insurance/insurance-enhanced';
 import { getLocationFromZip } from '../lib/zip-lookup';
+import { getRegionFromStateAbbr } from '../lib/regions';
 import { debounce } from '../lib/utils';
 
 // Import types from the main types file
@@ -337,6 +338,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
         const effectiveNecessaryDebts = necessaryDebts > 0 ? necessaryDebts : 
                                         (compensatingFactors.necessaryDebts || userInputs.necessaryDebts || 0);
         // Use unified calculation with iteration
+        const stateAbbrForRegion = userInputs.location?.match(/\b([A-Z]{2})\b/)?.[1]
         const fhaParams = {
           income: userInputs.income,
           monthlyDebts: effectiveMonthlyDebts,
@@ -344,7 +346,12 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
           fico: userInputs.fico,
           propertyTax: userInputs.propertyTax,
           insurance: userInputs.homeInsurance,
-          zipCode: userInputs.zipCode
+          zipCode: userInputs.zipCode,
+          ausMode: userInputs.ausMode ?? true,
+          positiveRentHistory: userInputs.positiveRentHistory,
+          monthlyTaxes: userInputs.monthlyTaxes,
+          childcareExpense: userInputs.childcareExpense,
+          region: getRegionFromStateAbbr(stateAbbrForRegion || undefined)
         };
         
         const factorParams = {
@@ -370,6 +377,15 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
 
         // Get DTI progress data and merge with full DTI result
         const progressData = getDTIProgressData(dtiResult);
+        // Estimate $ per 1% DTI using a small delta to the DTI used
+        const baselineDTIUsed = result.convergedDTI
+        const epsilon = 0.01 // 1% DTI
+        const lowerDTI = Math.max(0.30, baselineDTIUsed - epsilon)
+        const higherDTI = Math.min(0.5699, baselineDTIUsed + epsilon)
+        const lowerResult = calculateFHALoan({ ...fhaParams }, lowerDTI)
+        const higherResult = calculateFHALoan({ ...fhaParams }, higherDTI)
+        const dollarsPerDtiPercent = Math.round(((higherResult.maxLoanAmount - lowerResult.maxLoanAmount) / (2 * epsilon)) ) // $ per 1.00 DTI
+
         const fullDTIProgressData: DTIProgressData = {
           currentDTI: progressData.currentDTI,
           maxDTI: progressData.maxDTI,
@@ -384,7 +400,8 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
             category: factor.category
           })),
           progressPercentage: dtiResult.progressPercentage,
-          remainingCapacity: dtiResult.remainingCapacity
+          remainingCapacity: dtiResult.remainingCapacity,
+          dollarsPerDtiPercent
         };
 
         // Update state WITHOUT setting showResults
@@ -459,6 +476,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
         const effectiveNecessaryDebts = necessaryDebts > 0 ? necessaryDebts : 
                                         (compensatingFactors.necessaryDebts || userInputs.necessaryDebts || 0);
         // Use unified calculation with iteration
+        const stateAbbrForRegion2 = userInputs.location?.match(/\b([A-Z]{2})\b/)?.[1]
         const fhaParams = {
           income: userInputs.income,
           monthlyDebts: effectiveMonthlyDebts,
@@ -466,7 +484,12 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
           fico: userInputs.fico,
           propertyTax: userInputs.propertyTax,
           insurance: userInputs.homeInsurance,
-          zipCode: userInputs.zipCode
+          zipCode: userInputs.zipCode,
+          ausMode: userInputs.ausMode ?? true,
+          positiveRentHistory: userInputs.positiveRentHistory,
+          monthlyTaxes: userInputs.monthlyTaxes,
+          childcareExpense: userInputs.childcareExpense,
+          region: getRegionFromStateAbbr(stateAbbrForRegion2 || undefined)
         };
         
         const factorParams = {
@@ -492,6 +515,13 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
 
         // Get DTI progress data and merge with full DTI result
         const progressData = getDTIProgressData(dtiResult);
+        const baselineDTIUsed2 = result.convergedDTI
+        const lowerDTI2 = Math.max(0.30, baselineDTIUsed2 - 0.01)
+        const higherDTI2 = Math.min(0.5699, baselineDTIUsed2 + 0.01)
+        const lowerResult2 = calculateFHALoan({ ...fhaParams }, lowerDTI2)
+        const higherResult2 = calculateFHALoan({ ...fhaParams }, higherDTI2)
+        const dollarsPerDtiPercent2 = Math.round(((higherResult2.maxLoanAmount - lowerResult2.maxLoanAmount) / (2 * 0.01)) )
+
         const fullDTIProgressData: DTIProgressData = {
           currentDTI: progressData.currentDTI,
           maxDTI: progressData.maxDTI,
@@ -506,7 +536,8 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
             category: factor.category
           })),
           progressPercentage: dtiResult.progressPercentage,
-          remainingCapacity: dtiResult.remainingCapacity
+          remainingCapacity: dtiResult.remainingCapacity,
+          dollarsPerDtiPercent: dollarsPerDtiPercent2
         };
 
         // Update state WITH showResults for explicit calculations
@@ -665,7 +696,9 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
             },
             userInputs: {
               ...state.userInputs,
-              propertyTax: propertyTaxInfo.monthlyPayment
+              propertyTax: propertyTaxInfo.monthlyPayment,
+              // Keep a richer location string so we can derive region reliably
+              location: locationString
             },
             uiState: { ...state.uiState, isCalculating: false }
           }));

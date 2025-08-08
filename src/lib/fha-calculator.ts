@@ -14,6 +14,12 @@ export interface FHALoanParams {
   propertyTax?: number;
   insurance?: number;
   zipCode?: string;
+  // Additional for AUS modeling and residual income
+  ausMode?: boolean;
+  positiveRentHistory?: boolean;
+  monthlyTaxes?: number;
+  childcareExpense?: number;
+  region?: 'Northeast' | 'Midwest' | 'South' | 'West';
 }
 
 export interface MIPRates {
@@ -24,6 +30,7 @@ export interface MIPRates {
 export interface FHALoanResult {
   maxLoanAmount: number;
   maxHomePrice: number;
+  downPaymentAmount: number;
   monthlyPayment: number;
   totalMonthlyPayment: number; // Including PITI + MIP
   upfrontMIP: number;
@@ -136,8 +143,7 @@ export const FHA_REQUIREMENTS = {
 export function calculateMaxLoanAmount(
   income: number,
   dtiRatio: number,
-  monthlyDebts: number,
-  homePrice?: number
+  monthlyDebts: number
 ): number {
   const interestRate = FHA_REQUIREMENTS.baseInterestRate;
   const monthlyIncome = income / 12;
@@ -381,6 +387,7 @@ export function calculateFHALoan(params: FHALoanParams, maxDTI: number = FHA_REQ
     return {
       maxLoanAmount: 0,
       maxHomePrice: 0,
+      downPaymentAmount: 0,
       monthlyPayment: 0,
       totalMonthlyPayment: 0,
       upfrontMIP: 0,
@@ -400,6 +407,7 @@ export function calculateFHALoan(params: FHALoanParams, maxDTI: number = FHA_REQ
     return {
       maxLoanAmount: 0,
       maxHomePrice: 0,
+      downPaymentAmount: 0,
       monthlyPayment: 0,
       totalMonthlyPayment: 0,
       upfrontMIP: 0,
@@ -438,6 +446,7 @@ export function calculateFHALoan(params: FHALoanParams, maxDTI: number = FHA_REQ
   return {
     maxLoanAmount: Math.round(maxLoanAmount),
     maxHomePrice: Math.round(maxHomePrice),
+    downPaymentAmount: Math.round(downPaymentAmount),
     monthlyPayment: pitiDetails.principalAndInterest,
     totalMonthlyPayment: pitiDetails.totalPITI,
     upfrontMIP: mipRates.upfrontMIP,
@@ -514,7 +523,7 @@ export function calculateFHALoanWithFactors(
   fhaParams: FHALoanParams,
   factorParams: CompensatingFactorParams
 ): FHALoanWithFactorsResult {
-  const { income, monthlyDebts, downPaymentPercent, fico, propertyTax, insurance } = fhaParams;
+  const { income, monthlyDebts, downPaymentPercent, fico } = fhaParams;
   const { necessaryDebts, cashReserves, currentHousingPayment, familySize } = factorParams;
   
   // Convergence parameters for fixed-point iteration
@@ -549,7 +558,14 @@ export function calculateFHALoanWithFactors(
       fhaResult.totalMonthlyPayment, // Use actual PITI payment
       fico,
       downPaymentPercent,
-      familySize
+      familySize,
+      {
+        ausMode: !!fhaParams.ausMode,
+        positiveRentHistory: !!fhaParams.positiveRentHistory,
+        monthlyTaxes: fhaParams.monthlyTaxes,
+        childcareExpense: fhaParams.childcareExpense,
+        region: fhaParams.region
+      }
     );
     
     // Step 3: Update DTI for next iteration

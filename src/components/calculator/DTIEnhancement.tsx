@@ -24,8 +24,14 @@ interface DTIEnhancementProps {
   compensatingFactors: {
     cashReserves?: number;
     necessaryDebts?: number;
+    projectedMonthlyPayment?: number;
   };
   onUpdateFactors: (factors: Record<string, number>) => void;
+  onUpdateUserInputs?: (updates: Record<string, any>) => void;
+  grossMonthlyIncome?: number;
+  regionLabel?: 'Northeast' | 'Midwest' | 'South' | 'West';
+  totalMonthlyDebts?: number;
+  dollarsPerDtiPercent?: number;
   className?: string;
 }
 
@@ -35,10 +41,18 @@ export function DTIEnhancement({
   borrowingPowerChange,
   compensatingFactors,
   onUpdateFactors,
+  onUpdateUserInputs,
+  grossMonthlyIncome,
+  regionLabel,
+  totalMonthlyDebts,
+  dollarsPerDtiPercent,
   className = ""
 }: DTIEnhancementProps) {
   const [localCashReserves, setLocalCashReserves] = useState(compensatingFactors.cashReserves || 0);
   const [showStep2, setShowStep2] = useState(false);
+  const [familySizeInput, setFamilySizeInput] = useState<number | undefined>(undefined);
+  const [monthlyTaxesInput, setMonthlyTaxesInput] = useState<number | undefined>(undefined);
+  const [childcareInput, setChildcareInput] = useState<number | undefined>(undefined);
 
   // Sync local state with props changes
   useEffect(() => {
@@ -47,6 +61,21 @@ export function DTIEnhancement({
 
   const currentDTIPercentage = (currentDTI * 100).toFixed(1);
   const dtiIncrease = ((currentDTI - DTI_CONSTANTS.baseDTI) * 100).toFixed(1);
+
+  // Estimate per-factor dollar impact using store-provided $ per 1% DTI if available, else fall back
+  const estimatedPerPercentLoanValue = (() => {
+    if (typeof dollarsPerDtiPercent === 'number' && dollarsPerDtiPercent > 0) {
+      return dollarsPerDtiPercent;
+    }
+    // Prefer global $ per 1% DTI if available via window event bridge (optional future improvement)
+    const payment = compensatingFactors.projectedMonthlyPayment || 0;
+    const sixMonths = payment * DTI_CONSTANTS.minCashReserveMonths;
+    // Use current results context if available via borrowingPowerChange; fallback to heuristic
+    if (borrowingPowerChange && borrowingPowerChange.maxLoanAmount > 0 && parseFloat(dtiIncrease) > 0) {
+      return Math.round((borrowingPowerChange.difference / parseFloat(dtiIncrease)) * 100) / 100; // $ per 1% DTI
+    }
+    return Math.round((sixMonths / 20) || 0); // rough placeholder when no context
+  })();
 
   const handleCashReservesChange = (value: number) => {
     setLocalCashReserves(value);
@@ -96,7 +125,7 @@ export function DTIEnhancement({
             </div>
           </div>
 
-          {/* Active Factors Summary */}
+          {/* Active Factors Summary with per-factor $ impact */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Automatic Factors */}
             <div className={`backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 ${
@@ -113,7 +142,7 @@ export function DTIEnhancement({
                   {factorStatus.highFICO ? (
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-400" />
-                      <span className="text-xs text-green-400 font-medium">+2%</span>
+                      <span className="text-xs text-green-400 font-medium">+2% (~+${Math.round(estimatedPerPercentLoanValue * 2).toLocaleString()})</span>
                     </div>
                   ) : (
                     <X className="h-4 w-4 text-slate-600" />
@@ -126,7 +155,7 @@ export function DTIEnhancement({
                   {factorStatus.largeDownPayment ? (
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-400" />
-                      <span className="text-xs text-green-400 font-medium">+2%</span>
+                      <span className="text-xs text-green-400 font-medium">+2% (~+${Math.round(estimatedPerPercentLoanValue * 2).toLocaleString()})</span>
                     </div>
                   ) : (
                     <X className="h-4 w-4 text-slate-600" />
@@ -139,7 +168,7 @@ export function DTIEnhancement({
                   {factorStatus.minimalPaymentIncrease ? (
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-400" />
-                      <span className="text-xs text-green-400 font-medium">+2%</span>
+                      <span className="text-xs text-green-400 font-medium">+2% (~+${Math.round(estimatedPerPercentLoanValue * 2).toLocaleString()})</span>
                     </div>
                   ) : (
                     <X className="h-4 w-4 text-slate-600" />
@@ -161,9 +190,85 @@ export function DTIEnhancement({
                     onChange={(e) => handleCashReservesChange(parseFloat(e.target.value) || 0)}
                     className="bg-slate-900/50 border-slate-700 text-white text-base px-3 py-2 rounded-lg"
                   />
-                  {factorStatus.cashReserves && (
-                    <p className="text-xs text-green-400 mt-1">✓ 6+ months reserves achieved</p>
-                  )}
+                  {(() => {
+                    const payment = compensatingFactors.projectedMonthlyPayment || 0;
+                    const threshold = DTI_CONSTANTS.minCashReserveMonths * payment;
+                    const months = payment > 0 ? (localCashReserves / payment) : 0;
+                    const additionalNeeded = Math.max(0, threshold - (localCashReserves || 0));
+                    return (
+                      <div className="mt-2 space-y-1 text-xs">
+                        <p className="text-slate-400">
+                          Payment: <span className="text-slate-300">${payment.toLocaleString()}</span> · 6 months: <span className="text-slate-300">${Math.round(threshold).toLocaleString()}</span>
+                        </p>
+                        <p className="text-slate-400">
+                          You have: <span className="text-slate-300">${(localCashReserves || 0).toLocaleString()}</span> (~{months.toFixed(1)} months)
+                        </p>
+                        {factorStatus.cashReserves ? (
+                          <p className="text-green-400">✓ 6+ months achieved — +3% DTI (~+${Math.round(estimatedPerPercentLoanValue * 3).toLocaleString()})</p>
+                        ) : (
+                          <p className="text-amber-400">Add ${Math.round(additionalNeeded).toLocaleString()} to reach 6 months</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Residual Income Helper */}
+                <div className="pt-2 border-t border-slate-700/40">
+                  <label className="text-sm text-slate-400 mb-2 block">Monthly cash left after all bills</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Household size"
+                      value={familySizeInput ?? ''}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value || '0', 10) || 0
+                        setFamilySizeInput(v)
+                        onUpdateUserInputs?.({ familySize: v })
+                      }}
+                      className="bg-slate-900/50 border-slate-700 text-white text-base px-3 py-2 rounded-lg"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Monthly taxes (withholding)"
+                      value={monthlyTaxesInput ?? ''}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value || '0') || 0
+                        setMonthlyTaxesInput(v)
+                        onUpdateUserInputs?.({ monthlyTaxes: v })
+                      }}
+                      className="bg-slate-900/50 border-slate-700 text-white text-base px-3 py-2 rounded-lg"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Childcare (optional)"
+                      value={childcareInput ?? ''}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value || '0') || 0
+                        setChildcareInput(v)
+                        onUpdateUserInputs?.({ childcareExpense: v })
+                      }}
+                      className="bg-slate-900/50 border-slate-700 text-white text-base px-3 py-2 rounded-lg"
+                    />
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
+                    <span>Region: <span className="text-slate-300">{regionLabel || 'Auto'}</span></span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!grossMonthlyIncome) return
+                        const est = Math.round(grossMonthlyIncome * 0.20)
+                        setMonthlyTaxesInput(est)
+                        onUpdateUserInputs?.({ monthlyTaxes: est })
+                      }}
+                      className="px-2 py-1 rounded-md bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/60 text-slate-300"
+                    >
+                      Quick estimate taxes
+                    </button>
+                  </div>
+                  <div className="mt-1 text-xs text-slate-400">
+                    Use this to help qualify for the Residual Income factor.
+                  </div>
                 </div>
               </div>
             </div>
@@ -184,7 +289,7 @@ export function DTIEnhancement({
             </div>
           )}
 
-          {/* Quick Summary */}
+          {/* Quick Summary and clarity for discretionary debt note */}
           <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
             <div className="flex items-center gap-4">
               <div className="flex-1">
@@ -202,6 +307,40 @@ export function DTIEnhancement({
                 </p>
               </div>
             </div>
+            <div className="mt-3 text-xs text-slate-400">
+              Tip: Keeping revolving balances under 10% can increase borrowing power by roughly
+              <span className="text-green-400"> ${Math.round(estimatedPerPercentLoanValue * 2).toLocaleString()}</span>.
+            </div>
+            {/* Top next steps */}
+            {(() => {
+              const activeIds = new Set(activeFactors.map(f => f.id))
+              const allCandidates: Array<{id: string; name: string; dtiInc: number}> = [
+                { id: 'cashReserves', name: 'Reach 6 months reserves', dtiInc: 3 },
+                { id: 'residualIncome', name: 'Meet residual income', dtiInc: 2 },
+                { id: 'minimalPaymentIncrease', name: 'Low payment shock', dtiInc: 2 },
+                { id: 'noDiscretionaryDebt', name: 'Low revolving balances', dtiInc: 2 },
+                { id: 'highFICO', name: 'Credit 740+', dtiInc: 2 },
+                { id: 'largeDownPayment', name: '10%+ down', dtiInc: 2 },
+              ]
+              const missing = allCandidates.filter(c => !activeIds.has(c.id))
+              const scored = missing.map(c => ({ ...c, dollars: Math.round(c.dtiInc * estimatedPerPercentLoanValue) }))
+                .sort((a,b) => b.dollars - a.dollars)
+                .slice(0,3)
+              if (scored.length === 0) return null
+              return (
+                <div className="mt-3">
+                  <p className="text-xs text-slate-500 mb-1">Most impactful next steps</p>
+                  <ul className="text-sm text-slate-300 space-y-1">
+                    {scored.map(s => (
+                      <li key={s.id} className="flex items-center justify-between">
+                        <span>• {s.name}</span>
+                        <span className="text-green-400 font-medium">~+${s.dollars.toLocaleString()}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })()}
           </div>
 
           {/* View Details Button */}
@@ -260,7 +399,7 @@ export function DTIEnhancement({
             {
               id: 'minimalPaymentIncrease',
               name: 'Low Payment Shock',
-              requirement: 'New payment ≤ current rent',
+              requirement: 'New payment ≤ 5% above current housing cost',
               active: factorStatus.minimalPaymentIncrease,
               boost: '+2%'
             },

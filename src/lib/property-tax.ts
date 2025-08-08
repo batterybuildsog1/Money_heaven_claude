@@ -244,7 +244,8 @@ export async function calculateApplicablePropertyTaxRate(
   const queryParams = {
     state,
     city,
-    county,
+    // County not available from parseLocation; enrich via ZIP lookup if needed upstream
+    // county,
     zipCode,
     isPrimaryResidence,
     isOver65: ownerAge ? ownerAge >= 65 : false,

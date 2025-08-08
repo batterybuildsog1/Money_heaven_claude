@@ -27,6 +27,12 @@ export interface UserInputs {
   propertyTax?: number;
   homeInsurance?: number;
   familySize?: number;
+  // Additional data for residual income and AUS modeling
+  homeSquareFeet?: number;
+  monthlyTaxes?: number; // combined federal/state/local withholding estimate
+  childcareExpense?: number;
+  positiveRentHistory?: boolean; // 12-month on-time rent
+  ausMode?: boolean; // prefer AUS simulation over manual tiers
   necessaryDebts?: number; // Calculated from student + auto loans
   // Property tax and insurance related inputs
   taxExemptions?: TaxExemptions;
@@ -120,6 +126,7 @@ export interface TaxExemptions {
 export interface CalculationResults {
   maxLoanAmount?: number;
   maxHomePrice?: number;
+  downPaymentAmount?: number;
   monthlyPayment?: number;
   totalMonthlyPayment?: number; // Including PITI + MIP
   debtToIncomeRatio?: number;
@@ -366,6 +373,7 @@ export interface DTIProgressData {
   activeFactors: DTIFactor[];
   progressPercentage: number;
   remainingCapacity: number;
+  dollarsPerDtiPercent?: number;
 }
 
 export interface MIPCalculation {

@@ -1,5 +1,6 @@
 import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -46,10 +47,12 @@ export default function Home() {
         {/* Background Image Effect */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900/80" />
-          <img 
+          <Image 
             src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop" 
             alt="Modern house"
-            className="absolute right-0 top-0 h-full w-full lg:w-2/3 object-cover opacity-30"
+            fill
+            className="object-cover opacity-30 lg:object-right"
+            priority
           />
         </div>
         

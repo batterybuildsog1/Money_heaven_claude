@@ -8,16 +8,14 @@ import { TrendingUp, Home, DollarSign, Calculator } from "lucide-react";
 export function CalculationSidebar() {
   const { results, previousResults, dtiProgressData, userInputs } = useCalculatorStore();
   
-  // Calculate standard lender amount based on conventional DTI limits (28% front-end, 36% back-end)
-  // FHA allows up to 31% front-end and 43% back-end (or 56.99% with compensating factors)
-  const conventionalMaxDTI = 36; // 36% back-end ratio for conventional loans
-  const fhaBaseDTI = 43; // 43% base FHA DTI
+  // Baseline comparison for other lenders: assume 45% back-end DTI (typical max without AUS 50%)
+  const baselineOtherLenderDTI = 45; // 45% back-end DTI baseline
+  const fhaBaseDTI = 43; // FHA base DTI for context only
   const currentDTI = results.debtToIncomeRatio || fhaBaseDTI; // This is already in percentage form (e.g., 45.0 for 45%)
   
-  // Calculate what a conventional lender would offer (limited by 36% DTI)
-  // Since both values are in percentage form, we can compare directly
-  const dtiRatio = Math.min(conventionalMaxDTI, currentDTI) / currentDTI;
-  const standardBorrowingPower = (results.maxLoanAmount || 0) * dtiRatio * 0.85; // Additional 15% reduction for conventional
+  // Calculate a comparable borrowing power using a 45% DTI baseline without arbitrary haircut
+  const dtiRatio = Math.min(baselineOtherLenderDTI, currentDTI) / currentDTI;
+  const standardBorrowingPower = (results.maxLoanAmount || 0) * dtiRatio;
   
   const percentIncrease = results.maxLoanAmount && standardBorrowingPower > 0 
     ? Math.round(((results.maxLoanAmount - standardBorrowingPower) / standardBorrowingPower) * 100)
@@ -39,13 +37,13 @@ export function CalculationSidebar() {
               previousValue={previousResults?.maxLoanAmount}
               className="text-4xl font-bold gradient-purple-text"
               showFloatingChange={true}
-              animationDuration={800}
+              animationDuration={1600}
             />
             {percentIncrease > 0 && (
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-400" />
                 <span className="text-sm text-green-400">
-                  ↑ {percentIncrease}% vs standard lenders
+                  ↑ {percentIncrease}% vs 45% DTI lenders
                 </span>
               </div>
             )}
@@ -67,7 +65,7 @@ export function CalculationSidebar() {
             <div className="relative">
               <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
                 <div 
-                  className="h-full gradient-purple rounded-full transition-all duration-500"
+                  className="h-full gradient-purple rounded-full transition-all duration-[1200ms]"
                   style={{ 
                     width: `${((results.debtToIncomeRatio || dtiProgressData.currentDTI * 100) / 56.99) * 100}%` 
                   }}

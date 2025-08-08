@@ -42,12 +42,14 @@ export function getSeededTaxRate(
   }
   
   // Try to find county-specific rate
-  if (county && stateData.counties) {
-    const countyData = stateData.counties[county as keyof typeof stateData.counties];
+  if (county && 'counties' in stateData && stateData.counties) {
+    const counties = stateData.counties as any;
+    const countyData = counties[county];
     if (countyData) {
       // Try city-specific rate first
-      if (city && countyData.cities) {
-        const cityRate = countyData.cities[city as keyof typeof countyData.cities];
+      if (city && 'cities' in countyData && countyData.cities) {
+        const cities = countyData.cities as any;
+        const cityRate = cities[city];
         if (cityRate) {
           return {
             rate: cityRate,
@@ -56,10 +58,12 @@ export function getSeededTaxRate(
         }
       }
       // Return county rate
-      return {
-        rate: countyData.baseRate,
-        source: `${county}, ${state} (seeded data)`
-      };
+      if ('baseRate' in countyData) {
+        return {
+          rate: countyData.baseRate,
+          source: `${county}, ${state} (seeded data)`
+        };
+      }
     }
   }
   
@@ -89,18 +93,18 @@ export function getSeededHomesteadExemption(
     const amount = homeValue * (exemption.value / 100);
     return {
       amount,
-      description: exemption.description
+      description: (exemption as any).description || `${exemption.value}% reduction`
     };
   } else if (exemption.type === 'dollar') {
     return {
       amount: exemption.value,
-      description: exemption.description
+      description: (exemption as any).description || `$${exemption.value} reduction`
     };
   } else if (exemption.type === 'cap') {
     // Tax cap doesn't reduce assessed value, it limits increases
     return {
       amount: 0,
-      description: exemption.description
+      description: (exemption as any).description || 'Tax increase cap'
     };
   }
   
@@ -123,7 +127,7 @@ export function getSeededSpecialExemptions(
   const exemptions: any = {};
   
   if (isVeteran) {
-    const veteranAmount = taxRatesData.specialExemptions.veteran.states[state as keyof typeof taxRatesData.specialExemptions.veteran.states];
+    const veteranAmount = (taxRatesData as any).specialExemptions?.veteran?.states?.[state];
     if (veteranAmount) {
       exemptions.veteran = {
         amount: veteranAmount,
@@ -133,7 +137,7 @@ export function getSeededSpecialExemptions(
   }
   
   if (isSenior) {
-    const seniorData = taxRatesData.specialExemptions.senior.states[state as keyof typeof taxRatesData.specialExemptions.senior.states];
+    const seniorData = (taxRatesData as any).specialExemptions?.senior?.states?.[state];
     if (seniorData && typeof seniorData === 'object' && seniorData.amount > 0) {
       exemptions.senior = {
         amount: seniorData.amount,
@@ -143,7 +147,7 @@ export function getSeededSpecialExemptions(
   }
   
   if (isDisabled) {
-    const disabilityAmount = taxRatesData.specialExemptions.disability.states[state as keyof typeof taxRatesData.specialExemptions.disability.states];
+    const disabilityAmount = (taxRatesData as any).specialExemptions?.disability?.states?.[state];
     if (disabilityAmount) {
       exemptions.disability = {
         amount: disabilityAmount,
@@ -281,8 +285,12 @@ export function hasDataForLocation(state: string, county?: string): boolean {
   const stateData = taxRatesData.states[state as keyof typeof taxRatesData.states];
   if (!stateData) return false;
   
-  if (county && stateData.counties) {
-    return county in stateData.counties;
+  // Some states include county-level data; guard access dynamically
+  if (county) {
+    const counties = (stateData as any).counties as Record<string, unknown> | undefined;
+    if (counties) {
+      return county in counties;
+    }
   }
   
   return true;

@@ -17,7 +17,7 @@ export function AnimatedCurrency({
   value,
   previousValue,
   showDifference = true,
-  animationDuration = 800,
+  animationDuration = 1600,
   className,
   showFloatingChange = true
 }: AnimatedCurrencyProps) {
@@ -36,7 +36,7 @@ export function AnimatedCurrency({
     // Show change indicator
     if (showFloatingChange && difference !== 0) {
       setShowChangeIndicator(true)
-      setTimeout(() => setShowChangeIndicator(false), 2000)
+      setTimeout(() => setShowChangeIndicator(false), 3200)
     }
 
     // Animate the number change
@@ -67,7 +67,7 @@ export function AnimatedCurrency({
     <div className="relative">
       <div 
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-900",
           isIncrease && "text-green-400",
           isDecrease && "text-red-400",
           className
@@ -102,7 +102,7 @@ export function AnimatedCurrency({
           )}
           style={{
             top: "-20px",
-            animation: "floatUp 2s ease-out forwards"
+            animation: "floatUp 3.2s ease-out forwards"
           }}
         >
           {isIncrease ? '+' : '-'}${Math.abs(difference).toLocaleString()}
