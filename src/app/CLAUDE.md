@@ -11,7 +11,7 @@ Simple rules for our simple app. We have 2 pages and 1 API route. Keep it that w
 ├── api/
 │   └── census/       # Census API proxy
 │       └── route.ts
-├── layout.tsx        # Root layout with Clerk
+├── layout.tsx        # Root layout with Convex Auth
 └── globals.css       # Global styles
 ```
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 - No route groups - we don't need (marketing) or (auth) folders
 - No parallel routes - too complex for our needs
 - No intercepting routes - unnecessary
-- No middleware beyond Clerk's - it's already there
+- No middleware beyond Convex Auth's - it's already there
 
 ## If We Add More Pages
 
@@ -103,7 +103,7 @@ Next.js provides error.tsx and loading.tsx - use them ONLY if needed:
 ## Environment Variables
 
 For Next.js in this app:
-- `NEXT_PUBLIC_*` - For client-side (Clerk, Convex URL)
+- `NEXT_PUBLIC_*` - For client-side (Convex URL only)
 - Others - Server-side only (API keys)
 
 Current setup is correct.

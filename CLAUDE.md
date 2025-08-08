@@ -4,24 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Borrowing Power Calculator - Technical Documentation
 
-## Development Commands
+## Quick Start
 
 ```bash
-# Start development server (Next.js frontend)
-npm run dev
+# Development
+npm run dev          # Start Next.js (port 3000)
+npx convex dev       # Start Convex backend (separate terminal)
 
-# Start Convex backend (in separate terminal)
-npx convex dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Deploy Convex functions
-npm run convex:deploy
+# Production Deployment
+npx convex deploy --yes    # Deploy Convex functions
+vercel --prod --yes        # Deploy to Vercel
 ```
+
+## Live URLs
+- **Production**: https://moneyheavenclaude.vercel.app
+- **Convex Dashboard**: https://dashboard.convex.dev/d/calm-ibis-514
 
 ## Development Workflow Guidelines
 
@@ -40,7 +37,7 @@ npm run convex:deploy
 - **Frontend**: Next.js 15 with App Router, React 19, TypeScript
 - **State Management**: Zustand (single store at `/src/store/calculator.ts`)
 - **Backend**: Convex (serverless functions with real-time updates)
-- **Authentication**: Convex Auth (OAuth providers)
+- **Authentication**: Convex Auth (Google OAuth only)
 - **UI Components**: shadcn/ui (copied components, not installed package)
 - **Styling**: Tailwind CSS v4 (NO @apply directives, NO arbitrary values)
 - **External APIs**: 
@@ -159,7 +156,7 @@ These features are implemented with clean, maintainable code that is straightfor
 1. **Frontend**: React + TypeScript
 2. **State Management**: Zustand
 3. **Backend**: Convex
-4. **Authentication**: Clerk
+4. **Authentication**: Convex Auth
 5. **UI Framework**: shadcn/ui + Tailwind CSS
 6. **External APIs**: Groq API with gpt-oss-120b for tax calculations
 
@@ -603,7 +600,7 @@ const riskMultipliers = {
 ### Feature 3: User Authentication & Scenarios
 
 #### Implementation Overview
-Simple, secure user authentication with scenario saving using Clerk + Convex.
+Simple, secure user authentication with scenario saving using Convex Auth.
 
 **Authentication Flow**:
 1. **Landing Page**: Sign In/Up buttons using Convex Auth hooks
@@ -613,7 +610,7 @@ Simple, secure user authentication with scenario saving using Clerk + Convex.
 **Scenario Management**:
 ```typescript
 interface Scenario {
-  userId: string;          // From Clerk auth
+  userId: string;          // From Convex Auth
   name?: string;           // Optional custom name
   inputs: UserInputs;      // All form data
   compensatingFactors: CompensatingFactors;
@@ -891,50 +888,47 @@ Clean, linear progression from landing to results.
 
 **IMPORTANT: Never commit API keys to version control. Store them in `.env.local` (development) or your deployment platform's environment variables (production).**
 
-#### Convex Auth (OAuth Providers)
-```
-# Set these in Convex dashboard environment variables:
-AUTH_GOOGLE_ID=<your-google-oauth-id>
-AUTH_GOOGLE_SECRET=<your-google-oauth-secret>
-AUTH_GITHUB_ID=<your-github-oauth-id>  # Optional
-AUTH_GITHUB_SECRET=<your-github-oauth-secret>  # Optional
-```
-
-#### xAI Grok API
-```
-XAI_API_KEY=<your-xai-api-key>
-```
-
-#### API Ninjas (ZIP Code Lookup)
-```
-# Get free key at: https://api-ninjas.com/register
-API_NINJAS_KEY=<your-api-ninjas-key>
-```
-
-#### Convex Configuration
-```
-NEXT_PUBLIC_CONVEX_URL=<your-convex-url>
-CONVEX_DEPLOYMENT=<your-convex-deployment>
-```
-
-**Setup Instructions:**
-1. Create OAuth applications on Google Cloud Console (and optionally GitHub)
-2. Generate production OAuth credentials
-3. Store credentials securely in Convex environment variables
-4. Never expose secrets in client-side code or logs
-
-## Development Commands
-
+#### Authentication Setup
 ```bash
-# Start development server
-npm run dev
+# Google OAuth (stored in Convex, not .env files)
+npx convex env set AUTH_GOOGLE_ID "your-client-id" --prod
+npx convex env set AUTH_GOOGLE_SECRET "your-secret" --prod
 
-# Run Convex backend
-npx convex dev
+# Google OAuth Console Settings:
+# Authorized JavaScript Origins:
+- http://localhost:3000
+- https://moneyheavenclaude.vercel.app
 
-# Build for production
-npm run build
+# Authorized Redirect URI (EXACT):
+- https://calm-ibis-514.convex.site/api/auth/callback/google
 ```
+
+#### API Keys (Set in both Convex and Vercel)
+```bash
+# Convex Environment Variables
+npx convex env set XAI_API_KEY "your-key" --prod
+npx convex env set GROQ_API_KEY "your-key" --prod
+
+# Vercel Environment Variables (via dashboard)
+NEXT_PUBLIC_CONVEX_URL=https://calm-ibis-514.convex.cloud
+API_NINJAS_KEY=your-api-ninjas-key
+GROQ_API_KEY=your-groq-key
+XAI_API_KEY=your-xai-key
+```
+
+## Environment Files Structure
+
+- `.env.local` - Development environment (local only)
+- `.env.production` - Production values for Vercel reference
+- `.env.backup` - Complete backup of all keys (git-ignored)
+- `jwt-keys.txt` - JWT keys for Convex Auth (git-ignored)
+
+## Deployment Process
+
+1. **Test locally**: `npm run dev` + `npx convex dev`
+2. **Deploy Convex**: `npx convex deploy --yes`
+3. **Deploy Vercel**: `vercel --prod --yes`
+4. **Verify**: Check https://moneyheavenclaude.vercel.app
 
 ## Maintenance Notes
 

@@ -6,15 +6,16 @@ This directory contains our Convex backend - keep it simple, secure, and type-sa
 ```
 /convex
 ├── _generated/         # Auto-generated Convex files (don't edit)
-├── auth.config.ts      # Convex Auth configuration
-├── crons.ts           # Scheduled functions (cache cleanup, etc.)
-├── propertyTax.ts     # Property tax cache queries & mutations
-├── rates.ts           # Mortgage rate management (scraping + xAI fallback)
-├── scenarios.ts       # User scenario CRUD operations
-├── schema.ts          # Database schema definitions
-├── types.ts           # Shared type definitions
-├── auth.ts            # Auth functions and exports
-└── xai.ts             # xAI/Groq integrations (property tax)
+├── auth.ts            # Convex Auth setup (Google OAuth only)
+├── http.ts            # HTTP routes for auth callbacks
+├── scenarios.ts       # User scenario CRUD operations  
+├── rates.ts           # Mortgage rate management
+├── propertyTax.ts     # Property tax cache
+├── groq.ts            # Groq API integration
+├── xai.ts             # xAI API integration
+├── crons.ts           # Scheduled tasks
+├── schema.ts          # Database schema
+└── types.ts           # Shared TypeScript types
 ```
 
 ## Core Principles
@@ -70,14 +71,19 @@ export const scenarioResults = v.object({
 Then use in both schema.ts and scenarios.ts to avoid duplication.
 
 ### 2. Authentication Pattern
-Using Convex Auth:
 ```typescript
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+// In queries/mutations:
 const userId = await getAuthUserId(ctx);
 if (!userId) {
   throw new Error("Not authenticated");
 }
+
+// auth.ts exports:
+export const { auth, signIn, signOut, store } = convexAuth({
+  providers: [Google],  // Only Google OAuth configured
+});
 ```
 
 ### 3. Data Access Pattern
@@ -131,17 +137,21 @@ Only when we have a REAL need:
 2. **Always check ownership** - users only see their own data
 3. **Use internal mutations** for admin tasks (like updating mortgage rates)
 
-## Testing Convex Functions
-Simple approach for our simple app:
+## Key Commands
+
 ```bash
-# Trigger mortgage rate update (scrape + xAI fallback)
-npx convex run rates:updateRateWithScraping
+# Development
+npx convex dev              # Start dev backend
+npx convex env list         # View env variables
+npx convex logs            # View function logs
 
-# Read current FHA rate
+# Production Deployment
+npx convex deploy --yes     # Deploy to production
+npx convex env set KEY "value" --prod  # Set prod env var
+
+# Testing Functions
 npx convex run rates:getCurrentFHARate
-
-# Directly test fallback
-npx convex run rates:fetchRateFromXAI
+npx convex run scenarios:list
 ```
 
 ## Caching Architecture (Added 2025)
@@ -199,9 +209,10 @@ Reference: https://docs.convex.dev/functions/query-functions
 - `xai.ts`: External API integration with xAI
 - `crons.ts`: Scheduled maintenance tasks
 
-## Recent Changes (2025-08-07)
-- Strengthened MND scraping with resilient regex against table content.
-- Updated xAI fallback to `grok-4-0709` and tightened prompt to request MND 30 Yr FHA daily survey numeric value only.
-- Verified: scrape writes 6.12%; fallback action returns 6.125.
+## Recent Changes (2025-08-08)
+- **Migration**: Moved from Clerk to Convex Auth with Google OAuth
+- **Auth Flow**: Using `getAuthUserId(ctx)` pattern
+- **HTTP Routes**: `http.ts` handles OAuth callbacks
+- **Deployment**: Production at calm-ibis-514.convex.cloud
 
 That's it. Keep it simple. Each module does one thing well.
