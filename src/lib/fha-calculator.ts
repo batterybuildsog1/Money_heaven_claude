@@ -75,7 +75,7 @@ const FHA_MIP_RATES = {
 };
 
 // Cached interest rate management
-let cachedRate: { rate: number; timestamp: number; source: string; wasFallbackUsed?: boolean } | null = null;
+const cachedRate: { rate: number; timestamp: number; source: string; wasFallbackUsed?: boolean } | null = null;
 const RATE_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hour cache to avoid frequent API calls
 
 /**
