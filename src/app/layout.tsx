@@ -30,14 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ConvexAuthNextjsServerProvider>
-      <ConvexClientProvider>
-        <html lang="en">
-          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ConvexAuthNextjsServerProvider>
+          <ConvexClientProvider>
             {children}
-          </body>
-        </html>
-      </ConvexClientProvider>
-    </ConvexAuthNextjsServerProvider>
+          </ConvexClientProvider>
+        </ConvexAuthNextjsServerProvider>
+      </body>
+    </html>
   );
 }

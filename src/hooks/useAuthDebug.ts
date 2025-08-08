@@ -27,12 +27,13 @@ export function useAuthDebug() {
     if (typeof window !== 'undefined') {
       const ws = (window as any).__convexWebSocket;
       if (ws) {
-        console.log('🌐 WebSocket State:', ws.readyState, {
+        const states: Record<number, string> = {
           0: 'CONNECTING',
           1: 'OPEN',
           2: 'CLOSING',
           3: 'CLOSED'
-        }[ws.readyState]);
+        };
+        console.log('🌐 WebSocket State:', ws.readyState, states[ws.readyState] || 'UNKNOWN');
       }
     }
     

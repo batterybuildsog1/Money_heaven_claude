@@ -47,7 +47,7 @@ export default function Home() {
                     className="text-slate-300 hover:text-white"
                     onClick={() => {
                       console.log('🔑 Sign In clicked');
-                      void signIn("google").then(() => {
+                      void signIn("google", { redirectTo: "/calculator" }).then(() => {
                         console.log('✅ Sign in promise resolved');
                       }).catch((err) => {
                         console.error('❌ Sign in error:', err);
@@ -60,7 +60,7 @@ export default function Home() {
                     className="gradient-purple hover:opacity-90 text-white"
                     onClick={() => {
                       console.log('🔑 Sign Up clicked');
-                      void signIn("google").then(() => {
+                      void signIn("google", { redirectTo: "/calculator" }).then(() => {
                         console.log('✅ Sign up promise resolved');
                       }).catch((err) => {
                         console.error('❌ Sign up error:', err);
@@ -119,7 +119,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple"
-                  onClick={() => void signIn("google")}
+                  onClick={() => void signIn("google", { redirectTo: "/calculator" })}
                 >
                   Sign Up for Free
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -323,8 +323,8 @@ export default function Home() {
             Join thousands of home buyers who have used our calculator to maximize their loan amount.
           </p>
           
-          {isLoading ? null : !isAuthenticated ? (
-            <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google")}>
+            {isLoading ? null : !isAuthenticated ? (
+              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google", { redirectTo: "/calculator" })}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
