@@ -8,7 +8,9 @@ import { Card } from '../components/ui/card';
 
 export default function Home() {
   const token = useAuthToken();
-  const isAuthenticated = !!token;
+  // Important: undefined means loading, null means not authenticated
+  const isLoading = token === undefined;
+  const isAuthenticated = token !== null && token !== undefined;
   const { signIn, signOut } = useAuthActions();
   return (
     <div className="min-h-screen gradient-dark">
@@ -23,7 +25,10 @@ export default function Home() {
               <h1 className="text-xl font-bold text-white">MoneyBucket</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {!isAuthenticated ? (
+              {isLoading ? (
+                // Show loading state or nothing while checking auth
+                <div className="text-slate-400">Loading...</div>
+              ) : !isAuthenticated ? (
                 <>
                   <Button
                     variant="ghost"
@@ -77,7 +82,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              {!isAuthenticated ? (
+              {isLoading ? null : !isAuthenticated ? (
                 <Button
                   size="lg"
                   className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple"
@@ -285,7 +290,7 @@ export default function Home() {
             Join thousands of home buyers who have used our calculator to maximize their loan amount.
           </p>
           
-          {!isAuthenticated ? (
+          {isLoading ? null : !isAuthenticated ? (
             <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google")}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />

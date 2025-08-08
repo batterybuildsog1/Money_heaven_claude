@@ -30,7 +30,9 @@ import { getRegionFromStateAbbr } from "../../lib/regions";
 
 export default function CalculatorPage() {
   const token = useAuthToken();
-  const isAuthenticated = !!token;
+  // Important: undefined means loading, null means not authenticated
+  const isLoading = token === undefined;
+  const isAuthenticated = token !== null && token !== undefined;
   const { signOut, signIn } = useAuthActions();
   const { create: createScenario } = useScenarios();
   const {
@@ -146,7 +148,9 @@ export default function CalculatorPage() {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
+              {isLoading ? (
+                <span className="text-slate-400">Loading...</span>
+              ) : isAuthenticated ? (
                 <button
                   className="text-slate-300 hover:text-white underline"
                   onClick={() => void signOut()}
