@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { AuthDebug } from '../components/AuthDebug';
 
 export default function Home() {
   const token = useAuthToken();
@@ -12,8 +13,19 @@ export default function Home() {
   const isLoading = token === undefined;
   const isAuthenticated = token !== null && token !== undefined;
   const { signIn, signOut } = useAuthActions();
+  
+  // Debug logging
+  console.log('🏠 HOME PAGE AUTH STATE:', {
+    token: token ? `${token.substring(0, 20)}...` : token,
+    isLoading,
+    isAuthenticated,
+    tokenType: typeof token,
+    timestamp: new Date().toISOString()
+  });
+  
   return (
     <div className="min-h-screen gradient-dark">
+      <AuthDebug />
       {/* Header */}
       <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -33,13 +45,27 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     className="text-slate-300 hover:text-white"
-                    onClick={() => void signIn("google")}
+                    onClick={() => {
+                      console.log('🔑 Sign In clicked');
+                      void signIn("google").then(() => {
+                        console.log('✅ Sign in promise resolved');
+                      }).catch((err) => {
+                        console.error('❌ Sign in error:', err);
+                      });
+                    }}
                   >
                     Sign In
                   </Button>
                   <Button
                     className="gradient-purple hover:opacity-90 text-white"
-                    onClick={() => void signIn("google")}
+                    onClick={() => {
+                      console.log('🔑 Sign Up clicked');
+                      void signIn("google").then(() => {
+                        console.log('✅ Sign up promise resolved');
+                      }).catch((err) => {
+                        console.error('❌ Sign up error:', err);
+                      });
+                    }}
                   >
                     Sign Up
                   </Button>
@@ -49,7 +75,14 @@ export default function Home() {
                   <Link href="/calculator">
                     <Button className="gradient-purple hover:opacity-90 text-white mr-4">Go to Calculator</Button>
                   </Link>
-                  <Button variant="outline" onClick={() => void signOut()}>Sign out</Button>
+                  <Button variant="outline" onClick={() => {
+                    console.log('🚪 Sign Out clicked');
+                    void signOut().then(() => {
+                      console.log('✅ Sign out complete');
+                    }).catch((err) => {
+                      console.error('❌ Sign out error:', err);
+                    });
+                  }}>Sign out</Button>
                 </>
               )}
             </div>
