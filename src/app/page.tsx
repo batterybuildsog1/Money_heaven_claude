@@ -10,8 +10,9 @@ import { AuthDebug } from '../components/AuthDebug';
 export default function Home() {
   const token = useAuthToken();
   // Important: undefined means loading, null means not authenticated
+  // typeof null === 'object' in JavaScript, so we must check explicitly
   const isLoading = token === undefined;
-  const isAuthenticated = token !== null && token !== undefined;
+  const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
   const { signIn, signOut } = useAuthActions();
   
   // Debug logging

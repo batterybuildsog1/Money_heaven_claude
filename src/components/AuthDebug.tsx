@@ -14,12 +14,19 @@ export function AuthDebug() {
   const [lastError, setLastError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Debug what token actually is
+    console.log('🔍 RAW TOKEN VALUE:', token);
+    console.log('🔍 TOKEN KEYS:', token && typeof token === 'object' ? Object.keys(token) : 'N/A');
+    console.log('🔍 TOKEN STRINGIFIED:', JSON.stringify(token));
+    
     const info = {
       tokenValue: token,
       tokenType: typeof token,
       isUndefined: token === undefined,
       isNull: token === null,
       isString: typeof token === 'string',
+      isObject: token && typeof token === 'object',
+      tokenKeys: token && typeof token === 'object' ? Object.keys(token) : [],
       tokenLength: typeof token === 'string' ? token.length : 'N/A',
       tokenPreview: typeof token === 'string' ? token.substring(0, 20) + '...' : 'N/A',
       timestamp: new Date().toISOString(),
@@ -40,16 +47,18 @@ export function AuthDebug() {
 
   const handleSignIn = async () => {
     console.log('🚀 Starting sign in...');
+    console.log('📍 Current URL:', window.location.href);
+    console.log('🔗 Convex URL:', process.env.NEXT_PUBLIC_CONVEX_URL);
     setSignInAttempts(prev => prev + 1);
     setLastError(null);
     
     try {
-      await signIn("google", {
-        redirectTo: window.location.href
-      });
+      const result = await signIn("google");
+      console.log('✅ Sign in result:', result);
       console.log('✅ Sign in initiated');
     } catch (error: any) {
       console.error('❌ Sign in error:', error);
+      console.error('❌ Error stack:', error?.stack);
       setLastError(error?.message || 'Unknown error');
     }
   };
@@ -76,6 +85,8 @@ export function AuthDebug() {
           '✅ AUTHENTICATED'
         }</div>
         <div>Token Type: {typeof token}</div>
+        <div>Token Value: {token === null ? 'null' : token === undefined ? 'undefined' : 'has value'}</div>
+        <div>Token Keys: {debugInfo.tokenKeys?.join(', ') || 'N/A'}</div>
         <div>Token Length: {debugInfo.tokenLength}</div>
         <div>Token Preview: {debugInfo.tokenPreview}</div>
         <div>Sign In Attempts: {signInAttempts}</div>

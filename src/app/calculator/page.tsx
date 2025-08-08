@@ -31,8 +31,9 @@ import { getRegionFromStateAbbr } from "../../lib/regions";
 export default function CalculatorPage() {
   const token = useAuthToken();
   // Important: undefined means loading, null means not authenticated
+  // typeof null === 'object' in JavaScript, so we must check explicitly
   const isLoading = token === undefined;
-  const isAuthenticated = token !== null && token !== undefined;
+  const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
   const { signOut, signIn } = useAuthActions();
   const { create: createScenario } = useScenarios();
   const {
