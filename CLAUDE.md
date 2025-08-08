@@ -434,7 +434,7 @@ transition: background-color 200ms ease;
 
 #### Mortgage Interest Rate Management
 
-**Implementation**: Primary web scraping (MortgageNewsDaily) with an xAI fallback. Cron triggers an internal action; DB writes and error logs use internal mutations. Rates are cached for 24h and surfaced via a public query and UI warning if stale or a fallback was used.
+**Implementation**: Primary web scraping (MortgageNewsDaily) with an xAI fallback. Cron triggers an internal action; DB writes and error logs use internal mutations. Rates are cached for 24h and surfaced via a public query and UI warning if stale or a fallback was used. As of 2025‑08‑07, scraping regex updated to match MND's table and xAI fallback upgraded to `grok-4-0709` with a targeted prompt for the “MND's 30 Year FHA (daily survey)” value.
 
 **Technical Approach (Convex pattern)**:
 ```typescript
@@ -489,9 +489,10 @@ export const getCurrentFHARate = query({
 - Show source and a banner if xAI fallback was used
 - Warning if rate is >24 hours old
 
-**Operational Notes (2025-08-07 test)**:
-- Manual run of `rates:updateRateWithScraping` returned failure (scrape pattern miss; xAI 404). The public query returned default 7.0 and marked as stale, and errors were logged to `rateUpdateErrors`.
-- Ensure `XAI_API_KEY` is set and consider refining scraping selectors if MortgageNewsDaily markup changes.
+**Operational Notes (2025-08-07 tests)**:
+- Initial run failed (regex miss; xAI 404). We refined selectors and switched model to `grok-4-0709`.
+- Current run succeeds: scrape stored 6.12% from MND; fallback action returns 6.125 when called directly.
+- Ensure `XAI_API_KEY` present; adjust selectors if MND markup changes.
 
 ### Feature 2: Property Insurance (Enhanced)
 

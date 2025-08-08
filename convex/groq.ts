@@ -369,7 +369,7 @@ export const queryPropertyTax = action({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-20b', // Using 20b model for better structured responses
+          model: 'openai/gpt-oss-120b',
           messages: [
             {
               role: 'system',
@@ -384,17 +384,13 @@ export const queryPropertyTax = action({
               content: '' // Empty assistant message to trigger response
             }
           ],
-          temperature: 1,
-          max_completion_tokens: 8192,
-          top_p: 1,
-          reasoning_effort: 'medium', // Add reasoning effort for better results
+          temperature: 0.2,
+          max_completion_tokens: 2048,
+          top_p: 0.9,
+          reasoning_effort: 'low',
           stream: false, // We need the full response
           stop: null,
-          tools: [
-            {
-              type: 'browser_search' // Enable browser search for real-time data
-            }
-          ]
+          tools: [{ type: 'browser_search' }]
         })
       });
       

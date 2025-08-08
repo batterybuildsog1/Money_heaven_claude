@@ -125,12 +125,11 @@ export const scrapeMortgageNewsDaily = internalAction({
       
       const html = await response.text();
       
-      // Multiple regex patterns to catch FHA rates
+      // Multiple regex patterns to robustly catch FHA rates (allowing for intervening markup/content)
       const patterns = [
-        /30[\s-]*year[\s-]*fha[^0-9]*(\d+\.\d+)%/i,
-        /fha[\s-]*30[\s-]*year[^0-9]*(\d+\.\d+)%/i,
-        /fha[^0-9]*(\d+\.\d+)%/i,
-        /(\d+\.\d+)%[^0-9]*fha/i,
+        /MND\s*'?s?\s*30\s*Year\s*FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
+        /30\s*Year\s*FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
+        /FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
       ];
       
       for (const pattern of patterns) {
@@ -168,19 +167,12 @@ export const fetchRateFromXAI = internalAction({
     try {
       console.log('Fetching FHA rates from xAI as fallback...');
       
-      const prompt = `What is the current 30-year FHA mortgage interest rate today? 
-      
-Please search for the most recent FHA mortgage rates and return just the numerical rate as a percentage.
-For example, if the rate is 6.875%, return just "6.875".
+      const prompt = `Return the current Mortgage News Daily (MND) 30 Year FHA daily survey rate as a number only.
 
-Focus on finding official sources like:
-- FHA.gov
-- HUD.gov  
-- Mortgage News Daily
-- Bankrate
-- Major lenders
-
-Return only the rate number without the % symbol.`;
+Constraints:
+- Target source: Mortgage News Daily's 30 Year FHA page and table entry labelled "MND's 30 Year FHA (daily survey)".
+- If multiple rates are shown (e.g., 30 Yr Fixed), choose the 30 Year FHA daily survey value.
+- Output: the numeric value only without the % symbol (e.g., 6.125). No other text.`;
 
       // Use the existing groq infrastructure (similar to property tax)
       const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -191,16 +183,11 @@ Return only the rate number without the % symbol.`;
         },
         body: JSON.stringify({
           messages: [
-            {
-              role: 'system',
-              content: 'You are a mortgage rate expert. Provide only numerical rates without additional commentary.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
+            { role: 'system', content: 'You are a mortgage rate expert. Provide only numerical rates without additional commentary.' },
+            { role: 'user', content: prompt }
           ],
-          model: 'grok-beta',
+          // Updated model name to current xAI flagship
+          model: 'grok-4-0709',
           temperature: 0.1,
         }),
       });
@@ -217,7 +204,7 @@ Return only the rate number without the % symbol.`;
       }
       
       // Extract rate from response
-      const rateMatch = content.match(/(\d+\.\d+)/);
+        const rateMatch = content.match(/(\d+(?:\.\d+)?)/);
       if (rateMatch) {
         const rate = parseFloat(rateMatch[1]);
         const validation = validateRate(rate);
@@ -284,6 +271,9 @@ export const updateRateWithScraping = internalAction({
         const response = await fetch('https://www.mortgagenewsdaily.com/mortgage-rates/30-year-fha', {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            , 'Accept-Language': 'en-US,en;q=0.9',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Cache-Control': 'no-cache'
           }
         });
         
@@ -293,12 +283,11 @@ export const updateRateWithScraping = internalAction({
         
         const html = await response.text();
         
-        // Multiple regex patterns to catch FHA rates
+        // Multiple regex patterns to robustly catch FHA rates (allowing for intervening markup/content)
         const patterns = [
-          /30[\s-]*year[\s-]*fha[^0-9]*(\d+\.\d+)%/i,
-          /fha[\s-]*30[\s-]*year[^0-9]*(\d+\.\d+)%/i,
-          /fha[^0-9]*(\d+\.\d+)%/i,
-          /(\d+\.\d+)%[^0-9]*fha/i,
+          /MND\s*'?s?\s*30\s*Year\s*FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
+          /30\s*Year\s*FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
+          /FHA[\s\S]*?(\d+(?:\.\d+)?)%/i,
         ];
         
         for (const pattern of patterns) {

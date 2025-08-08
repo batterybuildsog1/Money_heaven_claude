@@ -59,7 +59,7 @@ async function queryGroq(apiKey: string, systemPrompt: string, userPrompt: strin
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'openai/gpt-oss-20b',
+      model: 'openai/gpt-oss-120b',
       messages: [
         {
           role: 'system',
@@ -74,8 +74,8 @@ async function queryGroq(apiKey: string, systemPrompt: string, userPrompt: strin
           content: ''
         }
       ],
-      temperature: 0.3, // Lower temperature for more consistent results
-      max_completion_tokens: 4096,
+      temperature: 0.2, // Lower temperature for consistency
+      max_completion_tokens: 2048,
       top_p: 0.9,
       reasoning_effort: 'high', // Use high reasoning for better accuracy
       stream: false,

@@ -136,6 +136,9 @@ npx convex run rates:updateRateWithScraping
 
 # Read current FHA rate
 npx convex run rates:getCurrentFHARate
+
+# Directly test fallback
+npx convex run rates:fetchRateFromXAI
 ```
 
 ## Caching Architecture (Added 2025)
@@ -192,5 +195,10 @@ Reference: https://docs.convex.dev/functions/query-functions
 - `propertyTax.ts`: Cache property tax API responses
 - `xai.ts`: External API integration with xAI
 - `crons.ts`: Scheduled maintenance tasks
+
+## Recent Changes (2025-08-07)
+- Strengthened MND scraping with resilient regex against table content.
+- Updated xAI fallback to `grok-4-0709` and tightened prompt to request MND 30 Yr FHA daily survey numeric value only.
+- Verified: scrape writes 6.12%; fallback action returns 6.125.
 
 That's it. Keep it simple. Each module does one thing well.

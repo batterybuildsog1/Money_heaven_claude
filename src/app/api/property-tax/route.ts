@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       console.log('Cache miss or error, fetching fresh data');
     }
 
-    // Cache miss - fetch fresh data via Groq action with browser search
+    // Cache miss - fetch fresh data via Groq parallel action (smaller prompts, lower token use)
     const queryParams = {
       state,
       zipCode,
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       homeValue
     };
 
-    // Use Groq with browser search
-    const freshData = await convexClient.action(api.groq.queryPropertyTax, queryParams);
+    // Use Groq parallel action
+    const freshData = await convexClient.action(api.groq_parallel.queryPropertyTaxParallel, queryParams);
     
     return NextResponse.json(freshData);
   } catch (error) {

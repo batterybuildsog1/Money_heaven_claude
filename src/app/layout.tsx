@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Borrowing Power Calculator",
   description: "Calculate your home borrowing power with advanced financial analysis",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/icon.png", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({
