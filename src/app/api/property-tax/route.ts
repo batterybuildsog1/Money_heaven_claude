@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       if (cached) {
         return NextResponse.json(cached);
       }
-    } catch (error) {
+    } catch {
       console.log('Cache miss or error, fetching fresh data');
     }
 

@@ -3,10 +3,10 @@
 import { useCalculatorStore } from "../../store/calculator";
 import { Card } from "../ui/card";
 import { AnimatedCurrency } from "./AnimatedCurrency";
-import { TrendingUp, Home, DollarSign, Calculator } from "lucide-react";
+import { TrendingUp, Home, DollarSign } from "lucide-react";
 
 export function CalculationSidebar() {
-  const { results, previousResults, dtiProgressData, userInputs } = useCalculatorStore();
+  const { results, previousResults, dtiProgressData } = useCalculatorStore();
   
   // Baseline comparison for other lenders: assume 45% back-end DTI (typical max without AUS 50%)
   const baselineOtherLenderDTI = 45; // 45% back-end DTI baseline

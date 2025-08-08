@@ -29,8 +29,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   return (
-    <ClerkProvider>
+    publishableKey ? (
+      <ClerkProvider publishableKey={publishableKey}>
+        <ConvexClientProvider>
+          <html lang="en">
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+              {children}
+            </body>
+          </html>
+        </ConvexClientProvider>
+      </ClerkProvider>
+    ) : (
+      // Fallback rendering if the publishable key is missing at build time
       <ConvexClientProvider>
         <html lang="en">
           <body
@@ -40,6 +54,6 @@ export default function RootLayout({
           </body>
         </html>
       </ConvexClientProvider>
-    </ClerkProvider>
+    )
   );
 }
