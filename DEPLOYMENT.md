@@ -3,7 +3,7 @@
 ## Production URLs
 - **Live App**: https://moneyheavenclaude.vercel.app
 - **Convex Dashboard**: https://dashboard.convex.dev/d/calm-ibis-514
-- **Vercel Dashboard**: https://vercel.com/alan-sunhomesios-projects/moneyheavenclaude
+- **Vercel Dashboard**: https://vercel.com/alan-sunhomesios-projects/money_heaven_claude
 
 ## Quick Deploy
 
