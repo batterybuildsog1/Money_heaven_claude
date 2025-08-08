@@ -17,6 +17,7 @@ import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as groq from "../groq.js";
 import type * as groq_parallel from "../groq_parallel.js";
+import type * as http from "../http.js";
 import type * as propertyTax from "../propertyTax.js";
 import type * as rates from "../rates.js";
 import type * as scenarios from "../scenarios.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   groq: typeof groq;
   groq_parallel: typeof groq_parallel;
+  http: typeof http;
   propertyTax: typeof propertyTax;
   rates: typeof rates;
   scenarios: typeof scenarios;
