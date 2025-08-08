@@ -143,7 +143,7 @@ export default function CalculatorPage() {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              <UserButton afterSignOutUrl="/" />
+              {typeof window !== 'undefined' && <UserButton afterSignOutUrl="/" />}
             </div>
           </div>
         </div>
