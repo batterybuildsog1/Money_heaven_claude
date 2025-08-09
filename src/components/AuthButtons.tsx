@@ -14,7 +14,7 @@ export function AuthButtons() {
   const handleSignIn = useCallback(async () => {
     try {
       const redirectTo = 
-        typeof window !== 'undefined' && window.location.pathname === "/" 
+        typeof window !== "undefined" && window.location.pathname === "/" 
           ? "/calculator" 
           : window.location.pathname || "/calculator";
       await signIn("google", { redirectTo });
