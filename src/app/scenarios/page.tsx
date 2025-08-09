@@ -10,8 +10,11 @@ import { CompareDrawer } from "@/components/scenarios/CompareDrawer";
 import { useToast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { useCalculatorStore } from "@/store/calculator";
+import { useAuthToken } from "@convex-dev/auth/react";
 
 export default function ScenariosPage() {
+  const token = useAuthToken();
+  const isAuthenticated = useMemo(() => token !== null && token !== undefined, [token]);
   const { scenarios, remove, isLoading } = useScenarios();
   const [query, setQuery] = useState("");
   const [minLoan, setMinLoan] = useState("");
@@ -53,6 +56,7 @@ export default function ScenariosPage() {
   }, [query, minLoan, maxLoan, sortKey, sortDir, visible]);
 
   const filtered = useMemo(() => {
+    if (!isAuthenticated) return [];
     return (scenarios || []).filter((s: any) => {
       const text = `${s.name ?? ""} ${s.inputs?.location ?? ""}`.toLowerCase();
       const matchText = query ? text.includes(query.toLowerCase()) : true;
@@ -61,7 +65,7 @@ export default function ScenariosPage() {
       const matchMax = maxLoan ? loan <= parseFloat(maxLoan) : true;
       return matchText && matchMin && matchMax;
     });
-  }, [scenarios, query, minLoan, maxLoan]);
+  }, [scenarios, query, minLoan, maxLoan, isAuthenticated]);
 
   // Clamp page when filter results change (functional update avoids page dep)
   useEffect(() => {
@@ -187,6 +191,23 @@ export default function ScenariosPage() {
       error("Load failed");
     }
   };
+
+  if (token === undefined) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 text-center">
+        <p className="text-muted-foreground">Loading authentication...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Access Denied</h1>
+        <p className="text-muted-foreground">Please log in to view your saved scenarios.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

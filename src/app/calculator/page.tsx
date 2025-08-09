@@ -18,8 +18,12 @@ import { useScenarios } from "../../hooks/useScenarios";
 import { MapPin, DollarSign, CreditCard, TrendingUp, FileText, Home } from "lucide-react";
 import { getRegionFromStateAbbr } from "../../lib/regions";
 import { useToast } from "../../components/ui/toast";
+import { useAuthToken } from "@convex-dev/auth/react";
+import { useMemo } from "react";
 
 export default function CalculatorPage() {
+  const token = useAuthToken();
+  const isAuthenticated = useMemo(() => token !== null && token !== undefined, [token]);
   const { create: createScenario } = useScenarios();
   const {
     userInputs,
@@ -120,10 +124,18 @@ export default function CalculatorPage() {
 
   const hasResults = !!(uiState.showResults && results.maxLoanAmount);
 
+  if (token === undefined) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading calculator...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Save Scenario Modal */}
-      {showSaveModal && (
+      {showSaveModal && isAuthenticated && (
         <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-labelledby="save-scenario-title" aria-describedby="save-scenario-desc">
           <div
             className="absolute inset-0 bg-black/50"
@@ -626,15 +638,27 @@ export default function CalculatorPage() {
               <CalculationSidebar />
             ) : (
               /* Saved Scenarios */
-              <Card className="bg-gradient-to-br from-slate-900 via-slate-800/90 to-slate-900 border-slate-700/50 p-6 shadow-2xl backdrop-blur-sm rounded-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-sky-500/20 rounded-lg">
-                    <FileText className="h-5 w-5 text-sky-400" />
+              isAuthenticated ? (
+                <Card className="bg-gradient-to-br from-slate-900 via-slate-800/90 to-slate-900 border-slate-700/50 p-6 shadow-2xl backdrop-blur-sm rounded-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-sky-500/20 rounded-lg">
+                      <FileText className="h-5 w-5 text-sky-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Saved Scenarios</h3>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Saved Scenarios</h3>
-                </div>
-                <SavedScenarios onLoadScenario={handleLoadScenario} />
-              </Card>
+                  <SavedScenarios onLoadScenario={handleLoadScenario} />
+                </Card>
+              ) : (
+                <Card className="bg-gradient-to-br from-slate-900 via-slate-800/90 to-slate-900 border-slate-700/50 p-6 shadow-2xl backdrop-blur-sm rounded-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-sky-500/20 rounded-lg">
+                      <FileText className="h-5 w-5 text-sky-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Log In to View Scenarios</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Log in to load and manage your saved calculations.</p>
+                </Card>
+              )
             )}
           </div>
         </div>

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { AuthDebug } from '../components/AuthDebug';
 
 export default function Home() {
   const token = useAuthToken();
@@ -20,26 +19,14 @@ export default function Home() {
         typeof window !== 'undefined' && window.location.pathname === '/' 
           ? '/calculator' 
           : (typeof window !== 'undefined' ? window.location.pathname : '/calculator');
-      console.log('🔑 Home CTA: initiating sign-in', { redirectTo, convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL });
-      const result = await signIn('google', { redirectTo });
-      console.log('✅ Home CTA: sign-in started', result);
+      await signIn('google', { redirectTo });
     } catch (err) {
       console.error('❌ Home CTA: sign-in error', err);
     }
   };
   
-  // Debug logging
-  console.log('🏠 HOME PAGE AUTH STATE:', {
-    token: token ? `${token.substring(0, 20)}...` : token,
-    isLoading,
-    isAuthenticated,
-    tokenType: typeof token,
-    timestamp: new Date().toISOString()
-  });
-  
   return (
     <div className="min-h-screen gradient-dark">
-      <AuthDebug />
       {/* Using global NavBar from layout */}
 
       {/* Hero Section */}

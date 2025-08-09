@@ -14,7 +14,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as auth from "../auth.js";
-import type * as authDebug from "../authDebug.js";
 import type * as crons from "../crons.js";
 import type * as groq from "../groq.js";
 import type * as groq_parallel from "../groq_parallel.js";
@@ -34,7 +33,6 @@ import type * as types from "../types.js";
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  authDebug: typeof authDebug;
   crons: typeof crons;
   groq: typeof groq;
   groq_parallel: typeof groq_parallel;

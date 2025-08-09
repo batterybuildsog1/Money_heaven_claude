@@ -14,12 +14,10 @@ export function AuthButtons() {
   const handleSignIn = useCallback(async () => {
     try {
       const redirectTo = 
-        typeof window !== "undefined" && window.location.pathname === "/" 
+        typeof window !== 'undefined' && window.location.pathname === "/" 
           ? "/calculator" 
           : window.location.pathname || "/calculator";
-      console.log("🔑 AuthButtons: initiating sign-in", { redirectTo, convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL });
-      const result = await signIn("google", { redirectTo });
-      console.log("✅ AuthButtons: sign-in started", result);
+      await signIn("google", { redirectTo });
     } catch (err) {
       console.error("❌ AuthButtons: sign-in error", err);
     }
@@ -27,9 +25,7 @@ export function AuthButtons() {
 
   const handleSignOut = useCallback(async () => {
     try {
-      console.log("🔒 AuthButtons: signing out");
       await signOut();
-      console.log("✅ AuthButtons: sign-out complete");
     } catch (err) {
       console.error("❌ AuthButtons: sign-out error", err);
     }
