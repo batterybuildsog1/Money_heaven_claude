@@ -2,25 +2,24 @@ import { NextRequest } from "next/server";
 
 const CONVEX_SITE = process.env.NEXT_PUBLIC_CONVEX_SITE_URL || "https://calm-ibis-514.convex.site";
 
-type RouteContext = { params: { path: string[] } };
-
-export async function GET(req: NextRequest, context: RouteContext) {
-  return proxy(req, context.params);
+export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
+  return proxy(req, params);
 }
 
-export async function POST(req: NextRequest, context: RouteContext) {
-  return proxy(req, context.params);
+export async function POST(req: NextRequest, { params }: { params: { path: string[] } }) {
+  return proxy(req, params);
 }
 
-export async function PUT(req: NextRequest, context: RouteContext) {
-  return proxy(req, context.params);
+export async function PUT(req: NextRequest, { params }: { params: { path: string[] } }) {
+  return proxy(req, params);
 }
 
-export async function DELETE(req: NextRequest, context: RouteContext) {
-  return proxy(req, context.params);
+export async function DELETE(req: NextRequest, { params }: { params: { path: string[] } }) {
+  return proxy(req, params);
 }
 
-async function proxy(req: NextRequest, { path }: { path: string[] }) {
+async function proxy(req: NextRequest, params: { path: string[] }) {
+  const { path } = params;
   const url = new URL(req.url);
   const target = `${CONVEX_SITE}/api/auth/${path.join("/")}${url.search}`;
 
