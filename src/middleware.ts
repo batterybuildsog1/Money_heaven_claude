@@ -20,6 +20,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|.*\\..*|api/auth).*)",
+    // Exclude all API routes, Next static assets, images, and favicon from middleware
+    "/((?!api|_next/static|_next/image|.*\\..*|favicon.ico).*)",
   ],
 };
