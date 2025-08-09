@@ -22,28 +22,22 @@ async function proxy(req: NextRequest, { path }: { path: string[] }) {
   const url = new URL(req.url);
   const target = `${CONVEX_SITE}/api/auth/${path.join("/")}${url.search}`;
 
-  const headers = new Headers(req.headers);
-  // Ensure host/cookie forwarding does not break cookies
-  headers.set("host", new URL(CONVEX_SITE).host);
-
+  // Forward the original headers/body; do NOT override Host so Convex
+  // can detect the external app domain via SITE_URL and return cookies/redirects correctly
   const init: RequestInit = {
     method: req.method,
-    headers,
+    headers: req.headers,
     body: req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer(),
     redirect: "manual",
   };
 
   const res = await fetch(target, init);
 
-  const responseHeaders = new Headers(res.headers);
-  // Forward Set-Cookie to the browser
-  const setCookie = (res as any).headers.getSetCookie?.() ?? [];
-  for (const c of setCookie) responseHeaders.append("Set-Cookie", c);
-
+  // Pass through all headers as-is so Set-Cookie is preserved
   return new Response(res.body, {
     status: res.status,
     statusText: res.statusText,
-    headers: responseHeaders,
+    headers: res.headers,
   });
 }
 
