@@ -14,6 +14,19 @@ export default function Home() {
   const isLoading = token === undefined;
   const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
   const { signIn } = useAuthActions();
+  const handleCtaSignIn = async () => {
+    try {
+      const redirectTo = 
+        typeof window !== 'undefined' && window.location.pathname === '/' 
+          ? '/calculator' 
+          : (typeof window !== 'undefined' ? window.location.pathname : '/calculator');
+      console.log('🔑 Home CTA: initiating sign-in', { redirectTo, convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL });
+      const result = await signIn('google', { redirectTo });
+      console.log('✅ Home CTA: sign-in started', result);
+    } catch (err) {
+      console.error('❌ Home CTA: sign-in error', err);
+    }
+  };
   
   // Debug logging
   console.log('🏠 HOME PAGE AUTH STATE:', {
@@ -59,7 +72,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel"
-                  onClick={() => void signIn("google", { redirectTo: "/calculator" })}
+                  onClick={handleCtaSignIn}
                 >
                   Sign Up for Free
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -280,7 +293,7 @@ export default function Home() {
           </p>
           
             {isLoading ? null : !isAuthenticated ? (
-              <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google", { redirectTo: "/calculator" })}>
+            <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={handleCtaSignIn}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
