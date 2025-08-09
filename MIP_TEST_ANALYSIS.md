@@ -129,3 +129,9 @@ node run-mip-tests.js
 ---
 
 **Status: ✅ VERIFIED** - The MIP calculation implementation is accurate and ready for production use.
+
+## ➡️ Next Steps
+
+1. Validate monthly MIP ranges across sample LTV buckets in live scenarios data to surface averages on the Dashboard (KPI tiles).
+2. Confirm FHA limit lookups for high-cost counties and surface a “limit proximity” KPI in Scenarios compare.
+3. Add unit tests for DTI factor combinations most commonly toggled by users.

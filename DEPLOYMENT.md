@@ -96,6 +96,11 @@ npm run dev          # Next.js on port 3000
 npx convex dev       # Convex backend (separate terminal)
 ```
 
+## UI/Theming Notes for Deployments
+- Supported themes: `theme-light`, `theme-dark`, `theme-steel`, `theme-prismatic`.
+- If legacy `theme-ocean` appears in markup, it is auto-removed by the ThemeSwitcher.
+- If purple accents appear after deploy, purge caches to ensure the latest `src/app/globals.css` is served.
+
 ## Maintenance
 
 ### Update API Keys

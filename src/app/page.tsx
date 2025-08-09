@@ -13,7 +13,7 @@ export default function Home() {
   // typeof null === 'object' in JavaScript, so we must check explicitly
   const isLoading = token === undefined;
   const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
-  const { signIn, signOut } = useAuthActions();
+  const { signIn } = useAuthActions();
   
   // Debug logging
   console.log('🏠 HOME PAGE AUTH STATE:', {
@@ -27,69 +27,7 @@ export default function Home() {
   return (
     <div className="min-h-screen gradient-dark">
       <AuthDebug />
-      {/* Header */}
-      <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="p-2 gradient-purple rounded-lg">
-                <HomeIcon className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-white">MoneyBucket</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              {isLoading ? (
-                // Show loading state or nothing while checking auth
-                <div className="text-slate-400">Loading...</div>
-              ) : !isAuthenticated ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    className="text-slate-300 hover:text-white"
-                    onClick={() => {
-                      console.log('🔑 Sign In clicked');
-                      void signIn("google", { redirectTo: "/calculator" }).then(() => {
-                        console.log('✅ Sign in promise resolved');
-                      }).catch((err) => {
-                        console.error('❌ Sign in error:', err);
-                      });
-                    }}
-                  >
-                    Sign In
-                  </Button>
-                  <Button
-                    className="gradient-purple hover:opacity-90 text-white"
-                    onClick={() => {
-                      console.log('🔑 Sign Up clicked');
-                      void signIn("google", { redirectTo: "/calculator" }).then(() => {
-                        console.log('✅ Sign up promise resolved');
-                      }).catch((err) => {
-                        console.error('❌ Sign up error:', err);
-                      });
-                    }}
-                  >
-                    Sign Up
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link href="/calculator">
-                    <Button className="gradient-purple hover:opacity-90 text-white mr-4">Go to Calculator</Button>
-                  </Link>
-                  <Button variant="outline" onClick={() => {
-                    console.log('🚪 Sign Out clicked');
-                    void signOut().then(() => {
-                      console.log('✅ Sign out complete');
-                    }).catch((err) => {
-                      console.error('❌ Sign out error:', err);
-                    });
-                  }}>Sign out</Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Using global NavBar from layout */}
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 overflow-hidden">
@@ -100,6 +38,7 @@ export default function Home() {
             src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop" 
             alt="Modern house"
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
             className="object-cover opacity-30 lg:object-right"
             priority
           />
@@ -109,7 +48,7 @@ export default function Home() {
           <div className="max-w-2xl">
             <h2 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
               <span className="text-white">Buy the house </span>
-              <span className="gradient-purple-text">they said<br />you couldn&apos;t.</span>
+              <span className="gradient-steel-text">they said<br />you couldn&apos;t.</span>
             </h2>
             <p className="text-xl lg:text-2xl text-slate-300 mb-8 leading-relaxed">
               Our FHA calculator helps you achieve homeownership, even when others say it&apos;s impossible.
@@ -119,7 +58,7 @@ export default function Home() {
               {isLoading ? null : !isAuthenticated ? (
                 <Button
                   size="lg"
-                  className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple"
+                  className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel"
                   onClick={() => void signIn("google", { redirectTo: "/calculator" })}
                 >
                   Sign Up for Free
@@ -127,7 +66,7 @@ export default function Home() {
                 </Button>
               ) : (
                 <Link href="/calculator">
-                  <Button size="lg" className="gradient-purple hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-purple">
+                  <Button size="lg" className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel">
                     Start Calculating
                     <Calculator className="ml-2 h-5 w-5" />
                   </Button>
@@ -138,20 +77,20 @@ export default function Home() {
             {/* Key Features */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-sky-400" />
                 </div>
                 <span className="text-slate-300">Maximize your mortgage approval up to 56.99% DTI</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-sky-400" />
                 </div>
                 <span className="text-slate-300">Find compensating factors that boost your borrowing power</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-purple-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-sky-400" />
                 </div>
                 <span className="text-slate-300">Get approved when traditional lenders say no</span>
               </div>
@@ -160,12 +99,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust strip */}
+      <section className="border-y border-slate-800 bg-slate-950/60">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-6 px-6 py-6 text-slate-400">
+          <span className="text-xs uppercase tracking-wide opacity-70">Trusted concepts from</span>
+          <ul className="flex flex-wrap items-center gap-6 text-sm">
+            <li aria-label="HUD FHA Guidelines" className="opacity-80">HUD FHA</li>
+            <li aria-hidden className="opacity-30">•</li>
+            <li aria-label="Consumer Financial Protection Bureau" className="opacity-80">CFPB</li>
+            <li aria-hidden className="opacity-30">•</li>
+            <li aria-label="County tax datasets" className="opacity-80">County Tax Data</li>
+            <li aria-hidden className="opacity-30">•</li>
+            <li aria-label="Mortgage News Daily" className="opacity-80">Mortgage News Daily</li>
+          </ul>
+        </div>
+      </section>
+
       {/* Comparison Section */}
       <section className="py-16 bg-slate-900">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              See how much <span className="gradient-purple-text">more house</span> you can afford
+              See how much <span className="gradient-steel-text">more house</span> you can afford
             </h3>
           </div>
           
@@ -183,9 +138,9 @@ export default function Home() {
                   <p className="text-sm text-slate-500 mt-2">Max home price</p>
                 </div>
                 
-                <div className="text-center p-6 bg-purple-900/20 rounded-xl border border-purple-800/30">
-                  <p className="text-purple-400 mb-2">With MoneyBucket</p>
-                  <p className="text-4xl font-bold gradient-purple-text">$417,481</p>
+                <div className="text-center p-6 bg-slate-800/40 rounded-xl border border-slate-700/40">
+                  <p className="text-sky-300 mb-2">With MoneyBucket</p>
+                  <p className="text-4xl font-bold gradient-steel-text">$417,481</p>
                   <p className="text-sm text-green-400 mt-2">↑ 28% more buying power</p>
                 </div>
               </div>
@@ -215,8 +170,8 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <Card className="p-8 text-center bg-slate-900 border-slate-700 hover:border-purple-800 transition-all hover:shadow-dark-xl">
-              <div className="w-16 h-16 gradient-purple rounded-full flex items-center justify-center mx-auto mb-6">
+            <Card className="p-8 text-center bg-slate-900 border-slate-700 hover:border-sky-800 transition-all hover:shadow-dark-xl">
+              <div className="w-16 h-16 gradient-steel rounded-full flex items-center justify-center mx-auto mb-6">
                 <Calculator className="w-8 h-8 text-white" />
               </div>
               <h4 className="text-xl font-semibold mb-4 text-white">Advanced FHA Calculations</h4>
@@ -282,7 +237,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 gradient-purple text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-dark-lg">
+              <div className="w-12 h-12 gradient-steel text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-dark-lg">
                 1
               </div>
               <h4 className="text-xl font-semibold mb-2 text-white">Enter Your Information</h4>
@@ -315,7 +270,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 gradient-purple text-white">
+      <section className="py-20 gradient-steel text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h3 className="text-3xl lg:text-4xl font-bold mb-4">
             Ready to Discover Your True Borrowing Power?
@@ -325,13 +280,13 @@ export default function Home() {
           </p>
           
             {isLoading ? null : !isAuthenticated ? (
-              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google", { redirectTo: "/calculator" })}>
+              <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={() => void signIn("google", { redirectTo: "/calculator" })}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           ) : (
             <Link href="/calculator">
-              <Button size="lg" className="bg-white text-purple-600 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
+              <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
                 Start Calculating Now
                 <Calculator className="ml-2 h-5 w-5" />
               </Button>
@@ -345,13 +300,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-3 mb-4 md:mb-0">
-              <div className="p-2 gradient-purple rounded-lg">
+              <div className="p-2 gradient-steel rounded-lg">
                 <HomeIcon className="h-5 w-5 text-white" />
               </div>
-              <span className="text-lg font-semibold">MoneyBucket</span>
+              <span className="text-lg font-semibold">Money Heaven</span>
             </div>
             <div className="text-sm text-slate-400">
-              <p>© 2025 MoneyBucket. Educational tool only.</p>
+              <p>
+                <span className="sr-only">Copyright</span>
+                © 2025 Money Heaven. Educational tool only.
+              </p>
             </div>
           </div>
         </div>

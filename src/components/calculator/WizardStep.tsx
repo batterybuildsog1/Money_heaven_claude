@@ -44,10 +44,10 @@ export function WizardStep({
         )}
         
         {/* Progress Bar */}
-        <div className="relative">
+        <div className="relative" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={(currentStep / totalSteps) * 100} aria-label={`Step ${currentStep} of ${totalSteps}`}>
           <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
             <div 
-              className="h-full gradient-purple rounded-full transition-all duration-500"
+              className="h-full gradient-steel rounded-full transition-all duration-500"
               style={{ 
                 width: `${(currentStep / totalSteps) * 100}%` 
               }}
@@ -63,9 +63,10 @@ export function WizardStep({
                   i + 1 < currentStep
                     ? "bg-green-500 border-green-500" // Completed
                     : i + 1 === currentStep
-                    ? "bg-purple-500 border-purple-500 ring-2 ring-purple-500/30" // Current
+                    ? "bg-sky-500 border-sky-500 ring-2 ring-sky-500/30" // Current
                     : "bg-slate-800 border-slate-700" // Future
                 }`}
+                aria-hidden
               />
             ))}
           </div>
@@ -91,7 +92,7 @@ export function WizardStep({
         
         {showResults ? (
           <Button
-            className="gradient-purple hover:opacity-90 text-white px-8"
+            className="gradient-steel hover:opacity-90 text-white px-8"
             onClick={onNext}
           >
             View Results
@@ -101,7 +102,7 @@ export function WizardStep({
           <Button
             onClick={onNext}
             disabled={!isValid}
-            className="gradient-purple hover:opacity-90 text-white px-8"
+            className={`hover:opacity-90 text-white px-8 ${isValid ? 'gradient-steel' : 'bg-slate-700'}`}
           >
             {currentStep === totalSteps ? "View Results" : "Next"}
             <ChevronRight className="h-4 w-4 ml-2" />

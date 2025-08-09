@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Money Heaven — App Overview
 
-## Getting Started
+Tech: Next.js App Router, TypeScript, Convex, shadcn/ui, Tailwind v4, Zustand.
 
-First, run the development server:
-
+### Local Development
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev          # Next.js on http://localhost:3000
+npx convex dev       # Convex backend (separate terminal)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Theming
+- Theme classes on `<html>`: `theme-light`, `theme-dark`, `theme-steel`, `theme-prismatic`.
+- Switcher: `src/components/ThemeSwitcher.tsx` (persists to localStorage).
+- Color tokens are OKLCH CSS vars in `src/app/globals.css`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Global Feedback & Motion
+- Toasts: `ToastProvider` + `useToast` in `src/components/ui/toast.tsx`. Provider mounted in `src/app/layout.tsx`.
+- Usage:
+```ts
+const { success, error, info } = useToast();
+success("Saved");
+```
+- Motion helpers: `.motion-hover` transition class, `.pressable` active scale.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### UI Building Blocks
+- UI primitives: `src/components/ui/` (shadcn)
+- KPI kit: `src/components/ui/kpi/`
+  - `KpiTile.tsx` — label, value, delta, icon
+  - `Sparkline.tsx` — tiny line chart
+  - `ProgressRing.tsx` — radial progress
 
-## Learn More
+### Pages
+- `src/app/page.tsx` — Marketing home (steel/prismatic tokens, no purple)
+- `src/app/calculator/page.tsx` — FHA calculator (wizard + results, steel tokens)
+- `src/app/scenarios/page.tsx` — Saved scenarios list with search/filters and compare (enhancements planned)
+- `src/app/dashboard/page.tsx` — User stats (to be upgraded to KPI bento)
+- `src/app/admin/page.tsx` — Manual rate update + status
 
-To learn more about Next.js, take a look at the following resources:
+### Data & Services
+- Convex functions in `convex/` (rates, scenarios, crons)
+- Mortgage rate hook with fallback/stale warnings: `src/hooks/useMortgageRates.ts`
+- Scenarios CRUD: `src/hooks/useScenarios.ts`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Roadmap (UI)
+1) Dashboard v2 using KPI bento and sparklines
+   - Files: `src/app/dashboard/page.tsx`, `src/components/ui/kpi/*`
+   - Deliverables: 4–6 KPI tiles, sparkline of recent scenarios, recent activity list
+2) Scenarios CRM table (sticky header, multi-select, compare drawer)
+   - Files: `src/app/scenarios/page.tsx`, `src/components/ui/table/*`, `src/components/scenarios/CompareDrawer.tsx`
+   - Deliverables: table with filters/sort, side-by-side compare drawer with KPI tiles and sparkline
+3) Calculator micro-interactions and inline validation refinements
+   - Files: `src/app/calculator/page.tsx`, `src/components/calculator/*`
+   - Deliverables: step transitions, input validation hints, animated KPIs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `UI_INSPIRATION.md` for visual direction and references.
 
-## Deploy on Vercel
+## Phase Plan (Detailed)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Phase A — Dashboard v2 (KPI Bento)
+- Files to edit:
+  - `src/app/dashboard/page.tsx` (compose tiles and charts)
+  - `src/components/ui/kpi/KpiTile.tsx`, `Sparkline.tsx`, `ProgressRing.tsx` (use)
+- Data sources:
+  - `useScenarios()` for counts, averages, recent list
+- Acceptance:
+  - 4–6 tiles responsive >320px, sparkline fed by last N scenarios’ maxLoan
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Phase B — Scenarios CRM Table + Compare Drawer
+- Files to edit:
+  - `src/app/scenarios/page.tsx`
+  - `src/components/scenarios/CompareDrawer.tsx` (new)
+  - `src/components/ui/table/*` (light table primitives if needed)
+- Acceptance:
+  - Sticky header, sort/filter, multi-select actions, side-by-side comparison with KPI tiles and sparkline
+
+### Phase C — Calculator Micro‑interactions
+- Files to edit:
+  - `src/app/calculator/page.tsx`, `src/components/calculator/*`
+- Acceptance:
+  - Step slide/fade transitions, inline validation hints, animated KPI updates, standardized toasts

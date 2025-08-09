@@ -33,7 +33,7 @@ export function RateDisplay({ className = "" }: { className?: string }) {
   
   const getStatusIcon = () => {
     if (isLoading) {
-      return <div className="animate-spin h-4 w-4 border-2 border-purple-500 rounded-full border-t-transparent" />;
+      return <div className="animate-spin h-4 w-4 border-2 border-sky-500 rounded-full border-t-transparent" />;
     }
     
     if (wasFallbackUsed) {

@@ -6,8 +6,6 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card } from "../../components/ui/card";
 import { Slider } from "../../components/ui/slider";
-import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
-import Link from 'next/link';
 import { WizardStep } from "../../components/calculator/WizardStep";
 import { CalculationSidebar } from "../../components/calculator/CalculationSidebar";
 import { ComparisonCard } from "../../components/calculator/ComparisonCard";
@@ -17,24 +15,11 @@ import { BorrowingPowerNotificationContainer } from "../../components/calculator
 import { AnimatedCurrency } from "../../components/calculator/AnimatedCurrency";
 import { RateDisplay } from "../../components/calculator/RateDisplay";
 import { useScenarios } from "../../hooks/useScenarios";
-import { 
-  Calculator, 
-  MapPin, 
-  DollarSign, 
-  CreditCard,
-  TrendingUp,
-  FileText,
-  Home
-} from "lucide-react";
+import { MapPin, DollarSign, CreditCard, TrendingUp, FileText, Home } from "lucide-react";
 import { getRegionFromStateAbbr } from "../../lib/regions";
+import { useToast } from "../../components/ui/toast";
 
 export default function CalculatorPage() {
-  const token = useAuthToken();
-  // Important: undefined means loading, null means not authenticated
-  // typeof null === 'object' in JavaScript, so we must check explicitly
-  const isLoading = token === undefined;
-  const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
-  const { signOut, signIn } = useAuthActions();
   const { create: createScenario } = useScenarios();
   const {
     userInputs,
@@ -51,6 +36,8 @@ export default function CalculatorPage() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [scenarioName, setScenarioName] = useState("");
   const [monthlyDebtsBreakdown, setMonthlyDebtsBreakdown] = useState({
     carPayment: 0,
     creditCard: 0,
@@ -59,6 +46,7 @@ export default function CalculatorPage() {
     other: 0
   });
   const totalSteps = 4;
+  const { success, error } = useToast();
 
   // Handle step navigation
   const handleNext = async () => {
@@ -99,6 +87,7 @@ export default function CalculatorPage() {
       }
       
       setUIState({ showResults: true });
+      success("Calculation complete");
     } finally {
       setIsCalculating(false);
       setUIState({ isCalculating: false });
@@ -133,50 +122,65 @@ export default function CalculatorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Borrowing Power Notifications */}
-      <BorrowingPowerNotificationContainer />
-      
-      {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 lg:py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="p-2.5 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-lg shadow-purple-500/20">
-                <Calculator className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl lg:text-2xl font-semibold text-white group-hover:text-purple-300 transition-all duration-200">
-                MoneyBucket
-              </span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              {isLoading ? (
-                <span className="text-slate-400">Loading...</span>
-              ) : isAuthenticated ? (
-                <button
-                  className="text-slate-300 hover:text-white underline"
-                  onClick={() => void signOut()}
-                >
-                  Sign out
-                </button>
-              ) : (
-                <button
-                  className="text-slate-300 hover:text-white underline"
-                  onClick={() => void signIn("google")}
-                >
-                  Sign in
-                </button>
-              )}
+      {/* Save Scenario Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-labelledby="save-scenario-title" aria-describedby="save-scenario-desc">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowSaveModal(false)}
+            aria-hidden
+          />
+          <div
+            className="absolute left-1/2 top-1/2 w-[92%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-card p-4 shadow-xl"
+            tabIndex={-1}
+            onKeyDown={(e) => { if (e.key === 'Escape') setShowSaveModal(false); }}
+          >
+            <h3 id="save-scenario-title" className="mb-2 text-lg font-semibold">Save Scenario</h3>
+            <p id="save-scenario-desc" className="mb-3 text-sm text-muted-foreground">Give this scenario a short name.</p>
+            <Input
+              autoFocus
+              placeholder="e.g., Seattle 2025-06"
+              value={scenarioName}
+              onChange={(e) => setScenarioName(e.target.value)}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSaveModal(false)}>Cancel</Button>
+              <Button
+                disabled={!scenarioName.trim()}
+                onClick={async () => {
+                  try {
+                    await createScenario({
+                      inputs: userInputs,
+                      compensatingFactors,
+                      results,
+                      name: scenarioName.trim(),
+                    });
+                    setShowSaveModal(false);
+                    setScenarioName("");
+                    success("Scenario saved");
+                  } catch (err) {
+                    console.error("Failed to save scenario:", err);
+                    error("Save failed");
+                  }
+                }}
+              >
+                Save
+              </Button>
             </div>
           </div>
         </div>
-      </header>
+      )}
+      {/* Borrowing Power Notifications */}
+      <BorrowingPowerNotificationContainer />
+      
+      {/* Header removed; using global NavBar */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Hero Section */}
         {!hasResults && (
-          <div className="text-center mb-10">
-            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-              Calculate Your <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">FHA Borrowing Power</span>
+              <div className="text-center mb-10 animate-fade-in">
+             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
+               Calculate Your <span className="gradient-steel-text">FHA Borrowing Power</span>
             </h1>
             <p className="text-xl lg:text-2xl text-slate-300 max-w-3xl mx-auto">
               Discover how much home you can really afford with FHA loans and compensating factors
@@ -203,7 +207,7 @@ export default function CalculatorPage() {
                     <div className="space-y-8">
                       <div>
                         <label className="block text-base font-medium mb-3 text-slate-200">
-                          <MapPin className="inline h-4 w-4 mr-2 text-purple-400" />
+                          <MapPin className="inline h-4 w-4 mr-2 text-sky-400" />
                           ZIP Code
                         </label>
                         <Input
@@ -211,14 +215,19 @@ export default function CalculatorPage() {
                           placeholder="e.g., 90210"
                           value={userInputs.zipCode || ""}
                           onChange={(e) => updateUserInputs({ zipCode: e.target.value })}
-                          className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                           className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
+                           aria-invalid={!userInputs.zipCode ? true : undefined}
+                           aria-describedby={!userInputs.zipCode ? 'zip-hint' : undefined}
                         />
+                        {!userInputs.zipCode && (
+                          <p id="zip-hint" className="mt-2 text-sm text-amber-400">ZIP code is required.</p>
+                        )}
                         <p className="text-sm text-slate-400 mt-2">We&apos;ll use this to determine property taxes and insurance for your area</p>
                       </div>
                       
                       <div>
                         <label className="block text-base font-medium mb-3 text-slate-200">
-                          <DollarSign className="inline h-4 w-4 mr-2 text-purple-400" />
+                          <DollarSign className="inline h-4 w-4 mr-2 text-sky-400" />
                           Annual Income
                         </label>
                         <Input
@@ -226,13 +235,18 @@ export default function CalculatorPage() {
                           placeholder="e.g., 75000"
                           value={userInputs.income || ""}
                           onChange={(e) => updateUserInputs({ income: parseFloat(e.target.value) || 0 })}
-                          className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                           className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
+                           aria-invalid={!userInputs.income ? true : undefined}
+                           aria-describedby={!userInputs.income ? 'income-hint' : undefined}
                         />
+                        {!userInputs.income && (
+                          <p id="income-hint" className="mt-2 text-sm text-amber-400">Annual income is required.</p>
+                        )}
                       </div>
                       
                       <div>
                         <label className="block text-base font-medium mb-3 text-slate-200">
-                          <CreditCard className="inline h-4 w-4 mr-2 text-purple-400" />
+                          <CreditCard className="inline h-4 w-4 mr-2 text-sky-400" />
                           Credit Score (FICO)
                         </label>
                         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
@@ -245,8 +259,10 @@ export default function CalculatorPage() {
                               value={userInputs.fico || ""}
                               onChange={(e) => updateUserInputs({ fico: parseFloat(e.target.value) || 0 })}
                               className="w-32 bg-slate-900/50 border-slate-700 text-white text-xl font-semibold px-4 py-2 rounded-lg"
+                              aria-invalid={!userInputs.fico ? true : undefined}
+                              aria-describedby={!userInputs.fico ? 'fico-hint' : undefined}
                             />
-                            <span className={`text-base font-medium px-3 py-1 rounded-lg ${
+                             <span className={`text-base font-medium px-3 py-1 rounded-lg ${
                               (userInputs.fico || 0) >= 740 ? 'bg-green-500/20 text-green-400' :
                               (userInputs.fico || 0) >= 670 ? 'bg-yellow-500/20 text-yellow-400' :
                               (userInputs.fico || 0) >= 580 ? 'bg-orange-500/20 text-orange-400' :
@@ -273,13 +289,16 @@ export default function CalculatorPage() {
                             <span>740</span>
                             <span>850</span>
                           </div>
+                          {!userInputs.fico && (
+                            <p id="fico-hint" className="mt-3 text-sm text-amber-400">FICO score is required.</p>
+                          )}
                         </div>
                       </div>
 
                     {/* Current Rent */}
                     <div>
                       <label className="block text-base font-medium mb-3 text-slate-200">
-                        <Home className="inline h-4 w-4 mr-2 text-purple-400" />
+                        <Home className="inline h-4 w-4 mr-2 text-sky-400" />
                         Current Monthly Rent
                       </label>
                       <Input
@@ -291,7 +310,7 @@ export default function CalculatorPage() {
                           setMonthlyDebtsBreakdown(prev => ({ ...prev, rentPayment: value }));
                           updateUserInputs({ currentHousingPayment: value });
                         }}
-                        className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                         className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 text-white text-lg px-4 py-3 rounded-xl hover:border-slate-600 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                       />
                       <p className="text-sm text-slate-400 mt-2">We&apos;ll compare this to your potential mortgage payment</p>
                     </div>
@@ -313,7 +332,7 @@ export default function CalculatorPage() {
                     <div className="space-y-8">
                       <div>
                         <label className="block text-base font-medium mb-3 text-slate-200">
-                          <CreditCard className="inline h-4 w-4 mr-2 text-purple-400" />
+                           <CreditCard className="inline h-4 w-4 mr-2 text-sky-400" />
                           Monthly Debt Payments
                         </label>
                         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
@@ -385,10 +404,13 @@ export default function CalculatorPage() {
                             <div className="pt-3 border-t border-slate-700/50">
                               <div className="flex items-center justify-between">
                                 <label className="text-base font-medium text-slate-200">Total Monthly Debts</label>
-                                <span className="text-lg font-semibold text-purple-400">
+                                 <span className="text-lg font-semibold text-sky-400">
                                   ${(userInputs.monthlyDebts || 0).toLocaleString()}
                                 </span>
                               </div>
+                               {userInputs.monthlyDebts === undefined && (
+                                 <p id="debts-hint" className="mt-2 text-sm text-amber-400">Please enter any monthly debts or 0 if none.</p>
+                               )}
                             </div>
                           </div>
                         </div>
@@ -411,7 +433,7 @@ export default function CalculatorPage() {
                     <div className="space-y-8">
                       <div>
                         <label className="block text-base font-medium mb-3 text-slate-200">
-                          <DollarSign className="inline h-4 w-4 mr-2 text-purple-400" />
+                          <DollarSign className="inline h-4 w-4 mr-2 text-sky-400" />
                           Down Payment Percentage
                         </label>
                         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
@@ -421,7 +443,7 @@ export default function CalculatorPage() {
                             </div>
                             <div className="text-right">
                               <p className="text-sm text-slate-400">FHA Minimum</p>
-                              <p className="text-lg font-semibold text-purple-400">3.5%</p>
+                              <p className="text-lg font-semibold text-sky-400">3.5%</p>
                             </div>
                           </div>
                           <Slider
@@ -430,7 +452,7 @@ export default function CalculatorPage() {
                             min={3.5}
                             max={30}
                             step={0.5}
-                            className="w-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-purple-500 [&_[role=slider]]:to-blue-500 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-2 [&_[role=slider]]:ring-purple-500/20"
+                             className="w-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-sky-500 [&_[role=slider]]:to-blue-500 [&_[role=slider]]:shadow-lg [&_[role=slider]]:ring-2 [&_[role=slider]]:ring-sky-500/20"
                           />
                           <div className="flex justify-between mt-2 text-xs text-slate-500">
                             <span>3.5%</span>
@@ -451,6 +473,9 @@ export default function CalculatorPage() {
                               }
                             </p>
                           </div>
+                          {!userInputs.downPaymentPercent && (
+                            <p id="down-hint" className="mt-3 text-sm text-amber-400">Please choose a down payment percentage.</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -513,10 +538,10 @@ export default function CalculatorPage() {
                       Your FHA Borrowing Power
                     </h2>
                     <div className="mb-4">
-                      <AnimatedCurrency
+                       <AnimatedCurrency
                         value={results.maxLoanAmount || 0}
                         previousValue={previousResults?.maxLoanAmount}
-                        className="text-6xl lg:text-7xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
+                         className="text-6xl lg:text-7xl font-bold gradient-steel-text"
                         showFloatingChange={true}
                         animationDuration={1000}
                       />
@@ -551,7 +576,7 @@ export default function CalculatorPage() {
                     
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50">
                       <p className="text-base text-slate-400 mb-2">DTI Used</p>
-                      <p className="text-3xl font-bold text-purple-400">
+                       <p className="text-3xl font-bold text-sky-400">
                         {(results.debtToIncomeRatio || 0).toFixed(1)}%
                       </p>
                     </div>
@@ -570,22 +595,11 @@ export default function CalculatorPage() {
                     </Button>
                     
                     <Button
-                      onClick={async () => {
-                        try {
-                          await createScenario({
-                            inputs: userInputs,
-                            compensatingFactors,
-                            results,
-                            name: `Scenario - ${new Date().toLocaleDateString()}`,
-                          });
-                          // Simple confirmation for now
-                          alert('Scenario saved successfully!');
-                        } catch (error) {
-                          console.error('Failed to save scenario:', error);
-                          alert('Failed to save scenario. Please try again.');
-                        }
+                      onClick={() => {
+                        setScenarioName(`${userInputs.location || 'Scenario'} - ${new Date().toLocaleDateString()}`);
+                        setShowSaveModal(true);
                       }}
-                      className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white px-6 py-3 text-base rounded-xl shadow-lg shadow-purple-500/20 transition-all duration-200"
+                      className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-3 text-base rounded-xl shadow transition-all duration-200"
                     >
                       Save Scenario
                     </Button>
@@ -614,8 +628,8 @@ export default function CalculatorPage() {
               /* Saved Scenarios */
               <Card className="bg-gradient-to-br from-slate-900 via-slate-800/90 to-slate-900 border-slate-700/50 p-6 shadow-2xl backdrop-blur-sm rounded-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <FileText className="h-5 w-5 text-purple-400" />
+                  <div className="p-2 bg-sky-500/20 rounded-lg">
+                    <FileText className="h-5 w-5 text-sky-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-white">Saved Scenarios</h3>
                 </div>
@@ -625,6 +639,31 @@ export default function CalculatorPage() {
           </div>
         </div>
       </div>
+
+      {/* Sticky mobile CTA */}
+      {!hasResults && (
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-slate-900/80 backdrop-blur md:hidden" role="region" aria-label="Step actions">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="bg-slate-800 border-slate-700 text-white"
+              aria-disabled={currentStep === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={handleNext}
+              disabled={!isStepValid(currentStep) || isCalculating}
+              className={`${isStepValid(currentStep) ? 'gradient-steel' : 'bg-slate-700 text-slate-400'} text-white`}
+              aria-disabled={!isStepValid(currentStep) || isCalculating}
+            >
+              {currentStep === totalSteps ? (isCalculating ? 'Calculating…' : 'View Results') : 'Next'}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
