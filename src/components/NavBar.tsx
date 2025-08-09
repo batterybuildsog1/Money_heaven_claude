@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { AuthButtons } from "./AuthButtons";
 
 const navItems = [
   { href: "/calculator", label: "Calculator" },
@@ -36,6 +37,7 @@ export function NavBar() {
         <div className="flex items-center gap-3">
           <a href="#main-content" className="sr-only focus:not-sr-only focus:rounded focus:border focus:px-2 focus:py-1">Skip to content</a>
           <ThemeSwitcher />
+          <AuthButtons />
         </div>
       </div>
     </header>
