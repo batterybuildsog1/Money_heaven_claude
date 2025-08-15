@@ -28,5 +28,6 @@ export const config = {
     "/calculator/:path*",
     "/scenarios/:path*",
     "/admin/:path*",
+    "/api/auth/:path*",
   ],
 };
