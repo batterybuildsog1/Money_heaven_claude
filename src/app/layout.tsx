@@ -5,6 +5,7 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { NavBar } from "../components/NavBar";
 import "./globals.css";
 import { ToastProvider } from "../components/ui/toast";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,34 +50,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var key = 'app-theme';
-                  var stored = localStorage.getItem(key);
-                  var preferred = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light');
-                  var root = document.documentElement;
-                  var classes = ['theme-light','theme-dark','theme-steel','theme-prismatic'];
-                  for (var i=0; i<classes.length; i++) root.classList.remove(classes[i]);
-                  root.classList.add(preferred);
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ConvexAuthNextjsServerProvider>
-          <ConvexClientProvider>
-            <ToastProvider>
-              <NavBar />
-              <main id="main-content">{children}</main>
-            </ToastProvider>
-          </ConvexClientProvider>
-        </ConvexAuthNextjsServerProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          themes={["light", "dark", "steel", "prismatic"]}
+          storageKey="app-theme"
+          enableSystem={true}
+          disableTransitionOnChange={false}
+        >
+          <ConvexAuthNextjsServerProvider>
+            <ConvexClientProvider>
+              <ToastProvider>
+                <NavBar />
+                <main id="main-content">{children}</main>
+              </ToastProvider>
+            </ConvexClientProvider>
+          </ConvexAuthNextjsServerProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -2,11 +2,17 @@
 
 import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
 import { Button } from "./ui/button";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
 export function AuthButtons() {
   const token = useAuthToken();
   const { signIn, signOut } = useAuthActions();
+  const [isClient, setIsClient] = useState(false);
+
+  // Prevent hydration mismatch by not rendering until client-side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const isLoading = token === undefined;
   const isAuthenticated = useMemo(() => token !== null && token !== undefined && typeof token === "string", [token]);
@@ -31,7 +37,10 @@ export function AuthButtons() {
     }
   }, [signOut]);
 
-  if (isLoading) return null;
+  // Render placeholder during SSR and initial hydration
+  if (!isClient || isLoading) {
+    return <div className="h-9 w-20 bg-background"></div>;
+  }
 
   return isAuthenticated ? (
     <Button size="sm" variant="outline" onClick={handleSignOut}>Sign out</Button>

@@ -4,9 +4,17 @@ import Link from 'next/link';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const token = useAuthToken();
+  const [isClient, setIsClient] = useState(false);
+  
+  // Prevent hydration mismatch by not rendering auth-dependent UI until client-side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Important: undefined means loading, null means not authenticated
   // typeof null === 'object' in JavaScript, so we must check explicitly
   const isLoading = token === undefined;
@@ -46,7 +54,9 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              {isLoading ? null : !isAuthenticated ? (
+              {!isClient || isLoading ? (
+                <div className="h-12 w-48 bg-slate-700 rounded-lg animate-pulse"></div>
+              ) : !isAuthenticated ? (
                 <Button
                   size="lg"
                   className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel"
@@ -270,7 +280,9 @@ export default function Home() {
             Join thousands of home buyers who have used our calculator to maximize their loan amount.
           </p>
           
-            {isLoading ? null : !isAuthenticated ? (
+            {!isClient || isLoading ? (
+            <div className="h-12 w-48 bg-white/20 rounded-lg animate-pulse mx-auto"></div>
+          ) : !isAuthenticated ? (
             <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={handleCtaSignIn}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
