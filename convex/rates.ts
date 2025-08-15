@@ -37,17 +37,31 @@ export const getCurrentFHARate = query({
   },
 });
 
-// Admin function to manually update rate
-export const updateRate = mutation({
+// Admin function to manually update rate (internal only)
+export const updateRate = internalMutation({
   args: {
     rateType: v.string(),
     rate: v.number(),
     source: v.optional(v.string()),
+    adminEmail: v.string(), // Required to verify admin access
   },
   handler: async (ctx, args) => {
-    // TODO: Add admin authentication check here
-    // const identity = await ctx.auth.getUserIdentity();
-    // if (!isAdmin(identity)) throw new Error("Unauthorized");
+    // Admin authentication check
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || [];
+    
+    if (adminEmails.length === 0) {
+      throw new Error("No admin emails configured");
+    }
+    
+    if (!adminEmails.includes(args.adminEmail)) {
+      throw new Error("Admin access required - unauthorized email");
+    }
+    
+    // Validate rate before proceeding
+    const validation = validateRate(args.rate);
+    if (!validation.isValid) {
+      throw new Error(`Invalid rate: ${validation.error}`);
+    }
     
     const existing = await ctx.db
       .query("mortgageRates")
@@ -67,6 +81,36 @@ export const updateRate = mutation({
     } else {
       await ctx.db.insert("mortgageRates", rateData);
     }
+    
+    return { success: true };
+  },
+});
+
+// Public action for admin UI to update rates
+export const adminUpdateRate = action({
+  args: {
+    rateType: v.string(),
+    rate: v.number(),
+    source: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<{ success: boolean }> => {
+    // Get the authenticated user identity
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required");
+    }
+    
+    // Extract email from identity
+    const userEmail = identity.email;
+    if (!userEmail) {
+      throw new Error("User email not available");
+    }
+    
+    // Call the internal mutation to update the rate
+    await ctx.runMutation(internal.rates.updateRateInDB, {
+      rate: args.rate,
+      source: args.source || 'admin',
+    });
     
     return { success: true };
   },

@@ -67,8 +67,10 @@ vercel --prod --yes        # Deploy to Vercel
 
 4. **API Routes**:
    - `/src/app/api/zipcode/route.ts` - ZIP to location lookup via API Ninjas
+   - `/src/app/api/property-tax/route.ts` - Property tax calculation with Zod validation
    - Falls back to Zippopotamus if API Ninjas unavailable
-   - Returns city, state, county for property tax calculations
+   - All routes include timeout handling (5-30s) and proper error responses
+   - Input validation using Zod schemas for type safety and security
 
 5. **Type Safety**:
    - Shared types in `/src/types/index.ts`
@@ -153,12 +155,15 @@ The following features are intentionally comprehensive to provide accurate, valu
 These features are implemented with clean, maintainable code that is straightforward to understand and modify. The apparent complexity comes from comprehensive data coverage, not architectural over-abstraction.
 
 ### Technical Stack
-1. **Frontend**: React + TypeScript
+1. **Frontend**: React 19 + TypeScript
 2. **State Management**: Zustand
 3. **Backend**: Convex
 4. **Authentication**: Convex Auth
-5. **UI Framework**: shadcn/ui + Tailwind CSS
-6. **External APIs**: Groq API with gpt-oss-120b for tax calculations
+5. **Validation**: Zod schemas for API inputs
+6. **Styling**: Tailwind CSS v4 with tailwindcss-animate
+7. **Build**: Next.js 15 with proper route handler typing
+8. **UI Framework**: shadcn/ui components (enhanced)
+9. **External APIs**: Groq API with gpt-oss-120b for tax calculations
 
 ### UI/UX Design Guidelines
 

@@ -32,7 +32,6 @@ export function CalculatorForm({ className }: CalculatorFormProps) {
   const { 
     userInputs, 
     uiState, 
-    results,
     fhaLoanResult,
     calculateFHABorrowingPower,
     nextStep,

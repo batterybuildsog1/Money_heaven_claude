@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Badge } from "@/components/ui";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 
 export default function AdminPage() {
   const [rate, setRate] = useState("");
-  const updateRate = useMutation(api.rates.updateRate);
+  const updateRate = useAction(api.rates.adminUpdateRate);
   const current = useQuery(api.rates.getCurrentFHARate);
   const [busy, setBusy] = useState(false);
 

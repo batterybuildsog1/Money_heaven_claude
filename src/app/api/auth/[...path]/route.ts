@@ -2,20 +2,24 @@ import { NextRequest } from "next/server";
 
 const CONVEX_SITE = process.env.NEXT_PUBLIC_CONVEX_SITE_URL || "https://calm-ibis-514.convex.site";
 
-export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params);
+export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams);
 }
 
-export async function POST(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params);
+export async function POST(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams);
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params);
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams);
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params);
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams);
 }
 
 async function proxy(req: NextRequest, params: { path: string[] }) {

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Route segment config for timeout handling
+export const maxDuration = 30; // 30 seconds max execution
+export const dynamic = 'force-dynamic'; // For real-time data
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const zipCode = searchParams.get('zip');
@@ -24,6 +28,7 @@ export async function GET(request: NextRequest) {
       const response = await fetch(
         `https://api.api-ninjas.com/v1/zipcode?zip=${zipCode}`,
         {
+          signal: AbortSignal.timeout(5000), // 5 second timeout for fast lookup
           headers: {
             'X-Api-Key': apiNinjasKey,
             'Accept': 'application/json'
@@ -46,7 +51,9 @@ export async function GET(request: NextRequest) {
 
     // Fallback to Zippopotamus (free, no key required)
     console.log('[ZIP API] 🔄 FALLBACK to Zippopotamus (no county data)');
-    const fallbackResponse = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
+    const fallbackResponse = await fetch(`https://api.zippopotam.us/us/${zipCode}`, {
+      signal: AbortSignal.timeout(5000) // 5 second timeout for fast lookup
+    });
     
     if (!fallbackResponse.ok) {
       return NextResponse.json(
@@ -78,6 +85,15 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     console.error('ZIP code lookup error:', error);
+    
+    // Handle timeout errors specifically
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      return NextResponse.json(
+        { error: 'Request timeout - external service unavailable' }, 
+        { status: 504 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

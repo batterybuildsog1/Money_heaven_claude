@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { calculateFHALoanWithFactors, calculateFHALoan, calculatePITI, FHA_REQUIREMENTS } from '../lib/fha-calculator';
 import { getDTIProgressData, getDTIRecommendations } from '../lib/dti-factors';
 import { getFHALimitByZip } from '../lib/fha-limits';
-import { getPropertyTaxInfo, getMonthlyPropertyTax } from '../lib/property-tax';
-import { estimateHomeownersInsurance, getMonthlyInsurancePayment, getStateRiskFactors } from '../lib/insurance';
+import { getPropertyTaxInfo } from '../lib/property-tax';
+import { estimateHomeownersInsurance, getStateRiskFactors } from '../lib/insurance';
 import { getEnhancedInsuranceEstimate } from '../lib/insurance/insurance-enhanced';
 import { getLocationFromZip } from '../lib/zip-lookup';
 import { getRegionFromStateAbbr } from '../lib/regions';
@@ -59,6 +59,7 @@ interface CalculatorStore {
   clearAllErrors: () => void;
   
   // FHA-specific actions
+  _performFHACalculation: (showResults?: boolean) => void;
   calculateFHABorrowingPower: () => void;
   calculateFHABorrowingPowerSilent: () => void;
   
@@ -309,9 +310,8 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
         }));
       },
 
-      // FHA-specific calculation functions
-      // Silent version for real-time updates (doesn't set showResults)
-      calculateFHABorrowingPowerSilent: () => {
+      // Private helper method that contains all shared FHA calculation logic
+      _performFHACalculation: (showResults: boolean = false) => {
         const { userInputs, compensatingFactors } = get();
         
         if (!userInputs.income || !userInputs.fico || userInputs.monthlyDebts === undefined) {
@@ -404,7 +404,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
           dollarsPerDtiPercent
         };
 
-        // Update state WITHOUT setting showResults
+        // Update state with conditional showResults setting
         set((state) => ({
           fhaLoanResult: {
             ...fhaResult,
@@ -444,144 +444,23 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => {
             isHighCostArea: fhaLimitData?.isHighCost || false,
             loanProgram: 'FHA' as const
           },
-          uiState: { ...state.uiState, isCalculating: false }
+          uiState: { 
+            ...state.uiState, 
+            ...(showResults && { showResults: true }), 
+            isCalculating: false 
+          }
         }));
+      },
+
+      // FHA-specific calculation functions
+      // Silent version for real-time updates (doesn't set showResults)
+      calculateFHABorrowingPowerSilent: () => {
+        get()._performFHACalculation(false);
       },
 
       // Main calculation function that DOES set showResults (for explicit user actions)
       calculateFHABorrowingPower: () => {
-        const { userInputs, compensatingFactors } = get();
-        
-        if (!userInputs.income || !userInputs.fico || userInputs.monthlyDebts === undefined) {
-          return;
-        }
-        
-        // Default to FHA minimum if not specified
-        const downPaymentPercent = userInputs.downPaymentPercent || 3.5;
-
-        // Get FHA loan limit
-        const fhaLimitData = userInputs.zipCode ? getFHALimitByZip(userInputs.zipCode) : null;
-        
-        // Calculate necessary debts from individual debt fields
-        // Necessary = student loans + auto loans (transportation/education are necessary)
-        // Discretionary = credit cards + other debts
-        const necessaryDebts = (userInputs.studentLoanPayment || 0) + (userInputs.autoLoanPayment || 0);
-        const totalDebts = (userInputs.studentLoanPayment || 0) + 
-                          (userInputs.autoLoanPayment || 0) + 
-                          (userInputs.creditCardPayment || 0) + 
-                          (userInputs.otherDebtPayment || 0);
-        
-        // Use individual debts if available, otherwise fall back to total monthlyDebts
-        const effectiveMonthlyDebts = totalDebts > 0 ? totalDebts : (userInputs.monthlyDebts || 0);
-        const effectiveNecessaryDebts = necessaryDebts > 0 ? necessaryDebts : 
-                                        (compensatingFactors.necessaryDebts || userInputs.necessaryDebts || 0);
-        // Use unified calculation with iteration
-        const stateAbbrForRegion2 = userInputs.location?.match(/\b([A-Z]{2})\b/)?.[1]
-        const fhaParams = {
-          income: userInputs.income,
-          monthlyDebts: effectiveMonthlyDebts,
-          downPaymentPercent: downPaymentPercent,
-          fico: userInputs.fico,
-          propertyTax: userInputs.propertyTax,
-          insurance: userInputs.homeInsurance,
-          zipCode: userInputs.zipCode,
-          ausMode: userInputs.ausMode ?? true,
-          positiveRentHistory: userInputs.positiveRentHistory,
-          monthlyTaxes: userInputs.monthlyTaxes,
-          childcareExpense: userInputs.childcareExpense,
-          region: getRegionFromStateAbbr(stateAbbrForRegion2 || undefined)
-        };
-        
-        const factorParams = {
-          necessaryDebts: effectiveNecessaryDebts,
-          cashReserves: compensatingFactors.cashReserves || 0,
-          currentHousingPayment: userInputs.currentHousingPayment || 0,
-          familySize: userInputs.familySize || 1
-        };
-        
-        // Single unified calculation with iteration - solves circular dependency
-        const result = calculateFHALoanWithFactors(fhaParams, factorParams);
-        const fhaResult = result; // For compatibility with existing code
-        const dtiResult = result.dtiFactors;
-        
-        // Calculate PITI breakdown for display
-        const pitiBreakdown = calculatePITI(
-          fhaResult.maxLoanAmount,
-          fhaResult.maxHomePrice,
-          FHA_REQUIREMENTS.baseInterestRate,
-          userInputs.propertyTax,
-          userInputs.homeInsurance
-        );
-
-        // Get DTI progress data and merge with full DTI result
-        const progressData = getDTIProgressData(dtiResult);
-        const baselineDTIUsed2 = result.convergedDTI
-        const lowerDTI2 = Math.max(0.30, baselineDTIUsed2 - 0.01)
-        const higherDTI2 = Math.min(0.5699, baselineDTIUsed2 + 0.01)
-        const lowerResult2 = calculateFHALoan({ ...fhaParams }, lowerDTI2)
-        const higherResult2 = calculateFHALoan({ ...fhaParams }, higherDTI2)
-        const dollarsPerDtiPercent2 = Math.round(((higherResult2.maxLoanAmount - lowerResult2.maxLoanAmount) / (2 * 0.01)) )
-
-        const fullDTIProgressData: DTIProgressData = {
-          currentDTI: progressData.currentDTI,
-          maxDTI: progressData.maxDTI,
-          baseDTI: dtiResult.baseDTI,
-          totalIncrease: dtiResult.totalIncrease,
-          activeFactors: dtiResult.activeFactors.map(factor => ({
-            id: factor.id,
-            name: factor.name,
-            description: factor.description,
-            dtiIncrease: factor.dtiIncrease,
-            isActive: factor.isActive,
-            category: factor.category
-          })),
-          progressPercentage: dtiResult.progressPercentage,
-          remainingCapacity: dtiResult.remainingCapacity,
-          dollarsPerDtiPercent: dollarsPerDtiPercent2
-        };
-
-        // Update state WITH showResults for explicit calculations
-        set((state) => ({
-          fhaLoanResult: {
-            ...fhaResult,
-            fhaLoanLimit: fhaLimitData?.limit || 498250,
-            isHighCostArea: fhaLimitData?.isHighCost || false
-          },
-          dtiProgressData: fullDTIProgressData,
-          results: {
-            maxLoanAmount: fhaResult.maxLoanAmount,
-            maxHomePrice: fhaResult.maxHomePrice,
-            monthlyPayment: fhaResult.monthlyPayment,
-            totalMonthlyPayment: fhaResult.totalMonthlyPayment,
-            principalAndInterest: pitiBreakdown.principalAndInterest,
-            monthlyPropertyTax: pitiBreakdown.propertyTax,
-            monthlyInsurance: pitiBreakdown.insurance,
-            monthlyMIP: pitiBreakdown.mip,
-            debtToIncomeRatio: result.convergedDTI * 100, // Convert to percentage
-            loanToValueRatio: fhaResult.loanToValueRatio,
-            interestRate: FHA_REQUIREMENTS.baseInterestRate,
-            mip: fhaResult.monthlyMIP,
-            upfrontMIP: fhaResult.upfrontMIP,
-            recommendations: getDTIRecommendations(dtiResult, {
-              reserves: compensatingFactors.cashReserves || 0,
-              ficoScore: userInputs.fico || 580,
-              downPaymentPercent: downPaymentPercent,
-              currentHousingPayment: userInputs.currentHousingPayment || 0,
-              newMortgagePayment: fhaResult.totalMonthlyPayment,
-              totalMonthlyDebts: effectiveMonthlyDebts,
-              necessaryDebts: effectiveNecessaryDebts
-            }),
-            warnings: fhaResult.warnings,
-            meetsMinimumRequirements: fhaResult.meetsMinimumRequirements,
-            baseDTI: dtiResult.baseDTI,
-            maxAllowedDTI: dtiResult.maxAllowedDTI,
-            dtiIncrease: dtiResult.totalIncrease,
-            fhaLoanLimit: fhaLimitData?.limit || 498250,
-            isHighCostArea: fhaLimitData?.isHighCost || false,
-            loanProgram: 'FHA' as const
-          },
-          uiState: { ...state.uiState, showResults: true, isCalculating: false }
-        }));
+        get()._performFHACalculation(true);
       },
 
 

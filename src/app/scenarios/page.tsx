@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { useCalculatorStore } from "@/store/calculator";
 import { useAuthToken } from "@convex-dev/auth/react";
+import { Doc, Id } from "@/../convex/_generated/dataModel";
 
 export default function ScenariosPage() {
   const token = useAuthToken();
@@ -19,9 +20,9 @@ export default function ScenariosPage() {
   const [query, setQuery] = useState("");
   const [minLoan, setMinLoan] = useState("");
   const [maxLoan, setMaxLoan] = useState("");
-  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareIds, setCompareIds] = useState<Id<"scenarios">[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Id<"scenarios">[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const { success, error } = useToast();
@@ -47,7 +48,6 @@ export default function ScenariosPage() {
         setVisible(parsed.visible ?? { dti: true, down: true, created: true });
       }
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function ScenariosPage() {
 
   const filtered = useMemo(() => {
     if (!isAuthenticated) return [];
-    return (scenarios || []).filter((s: any) => {
+    return (scenarios || []).filter((s: Doc<"scenarios">) => {
       const text = `${s.name ?? ""} ${s.inputs?.location ?? ""}`.toLowerCase();
       const matchText = query ? text.includes(query.toLowerCase()) : true;
       const loan = s.results?.maxLoanAmount ?? 0;
@@ -79,8 +79,8 @@ export default function ScenariosPage() {
   const sorted = useMemo(() => {
     const arr = filtered.slice();
     const dir = sortDir === "asc" ? 1 : -1;
-    arr.sort((a: any, b: any) => {
-      const get = (s: any): number | string => {
+    arr.sort((a: Doc<"scenarios">, b: Doc<"scenarios">) => {
+      const get = (s: Doc<"scenarios">): number | string => {
         switch (sortKey) {
           case "name": return s.name ?? "";
           case "location": return s.inputs?.location ?? "";
@@ -103,7 +103,7 @@ export default function ScenariosPage() {
     return sorted.slice(start, start + pageSize);
   }, [sorted, page]);
 
-  const toggleCompare = (id: string) => {
+  const toggleCompare = (id: Id<"scenarios">) => {
     setCompareIds((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id].slice(-2);
       if (next.length === 2) setDrawerOpen(true);
@@ -111,12 +111,12 @@ export default function ScenariosPage() {
     });
   };
 
-  const toggleSelected = (id: string) => {
+  const toggleSelected = (id: Id<"scenarios">) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const selectAllVisible = () => {
-    const ids = sorted.map((s: any) => s._id);
+    const ids = sorted.map((s: Doc<"scenarios">) => s._id);
     const allSelected = ids.every((id) => selectedIds.includes(id));
     setSelectedIds(allSelected ? selectedIds.filter((id) => !ids.includes(id)) : Array.from(new Set([...selectedIds, ...ids])));
   };
@@ -124,7 +124,7 @@ export default function ScenariosPage() {
   const exportCsv = () => {
     const rows = [
       ["Name", "Location", "Income", "MaxLoan", "DTI", "Created"],
-      ...filtered.map((s: any) => [
+      ...filtered.map((s: Doc<"scenarios">) => [
         s.name ?? "",
         s.inputs?.location ?? "",
         s.inputs?.income ?? "",
@@ -147,8 +147,8 @@ export default function ScenariosPage() {
     const rows = [
       ["Name", "Location", "Income", "MaxLoan", "DTI", "Created"],
       ...sorted
-        .filter((s: any) => selectedIds.includes(s._id))
-        .map((s: any) => [
+        .filter((s: Doc<"scenarios">) => selectedIds.includes(s._id))
+        .map((s: Doc<"scenarios">) => [
           s.name ?? "",
           s.inputs?.location ?? "",
           s.inputs?.income ?? "",
@@ -170,16 +170,16 @@ export default function ScenariosPage() {
 
   const deleteSelected = async () => {
     try {
-      // cast id because selectedIds are string from UI, Convex expects Id<"scenarios">
-      for (const id of selectedIds) await remove(id as any);
+      // Remove each selected scenario
+      for (const id of selectedIds) await remove(id);
       success("Deleted selected");
       setSelectedIds([]);
-    } catch (e) {
+    } catch {
       error("Delete failed");
     }
   };
 
-  const loadToCalculator = (s: any) => {
+  const loadToCalculator = (s: Doc<"scenarios">) => {
     try {
       updateUserInputs(s.inputs || {});
       updateCompensatingFactors(s.compensatingFactors || {});
@@ -187,7 +187,7 @@ export default function ScenariosPage() {
       setUIState({ showResults: true });
       success("Loaded in calculator");
       router.push("/calculator");
-    } catch (e) {
+    } catch {
       error("Load failed");
     }
   };
@@ -291,7 +291,7 @@ export default function ScenariosPage() {
                 </TR>
               </THead>
               <TBody>
-                {paged.map((s: any) => (
+                {paged.map((s: Doc<"scenarios">) => (
                   <TR key={s._id}>
                     <TD>
                       <input type="checkbox" aria-label="Select row" checked={selectedIds.includes(s._id)} onChange={() => toggleSelected(s._id)} />
@@ -310,7 +310,7 @@ export default function ScenariosPage() {
                         <Button size="sm" variant="outline" onClick={() => toggleCompare(s._id)}>
                           <ArrowRightLeft className="mr-1 h-3 w-3" /> Compare
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => remove(s._id as any)}>
+                        <Button size="sm" variant="ghost" onClick={() => remove(s._id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -353,8 +353,8 @@ export default function ScenariosPage() {
       <CompareDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        left={scenarios.find((x: any) => x._id === compareIds[0])}
-        right={scenarios.find((x: any) => x._id === compareIds[1])}
+        left={scenarios.find((x: Doc<"scenarios">) => x._id === compareIds[0])}
+        right={scenarios.find((x: Doc<"scenarios">) => x._id === compareIds[1])}
         onLoadLeft={(s) => loadToCalculator(s)}
         onLoadRight={(s) => loadToCalculator(s)}
       />

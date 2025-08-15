@@ -1,12 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
+import { z } from 'zod';
+
+// Route segment config for timeout handling
+export const maxDuration = 30; // 30 seconds max execution
+export const dynamic = 'force-dynamic'; // For real-time data
+
+// Zod validation schema for property tax requests
+const PropertyTaxSchema = z.object({
+  state: z.string().min(2).max(2).regex(/^[A-Z]{2}$/),
+  zipCode: z.string().regex(/^\d{5}$/).optional(),
+  city: z.string().min(1).max(100).optional(),
+  county: z.string().min(1).max(100).optional(),
+  homeValue: z.number().min(1000).max(50000000).optional(),
+  isPrimaryResidence: z.boolean(),
+  isOver65: z.boolean().optional(),
+  isVeteran: z.boolean().optional(),
+  isDisabled: z.boolean().optional(),
+});
+
 
 const convexClient = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Validate input with Zod
+    const validatedData = PropertyTaxSchema.parse(body);
+    
     const {
       state,
       zipCode,
@@ -17,17 +40,13 @@ export async function POST(request: NextRequest) {
       isVeteran,
       isDisabled,
       homeValue,
-    } = body;
+    } = validatedData;
 
-    // Provide safe defaults to satisfy Convex validators
-    const primary = (typeof isPrimaryResidence === 'boolean') ? isPrimaryResidence : true;
-    const senior = (typeof isOver65 === 'boolean') ? isOver65 : false;
-    const veteran = (typeof isVeteran === 'boolean') ? isVeteran : false;
-    const disabled = (typeof isDisabled === 'boolean') ? isDisabled : false;
-
-    if (!state) {
-      return NextResponse.json({ error: 'State is required' }, { status: 400 });
-    }
+    // Provide safe defaults for optional fields
+    const primary = isPrimaryResidence;
+    const senior = isOver65 ?? false;
+    const veteran = isVeteran ?? false;
+    const disabled = isDisabled ?? false;
 
     // Try to get cached property tax data first
     try {
@@ -68,6 +87,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(freshData);
   } catch (error) {
     console.error('Property tax API error:', error);
+    
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid input data', 
+          details: error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        }, 
+        { status: 400 }
+      );
+    }
+    
+    // Handle timeout errors specifically
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      return NextResponse.json(
+        { error: 'Request timeout - external service unavailable' }, 
+        { status: 504 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch property tax data' },
       { status: 500 }

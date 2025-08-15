@@ -85,6 +85,56 @@ calculateFHABorrowingPower: () => {
 }
 ```
 
+### 5. Avoiding Code Duplication in Actions
+**CRITICAL**: Never duplicate business logic between store actions. Extract shared logic into private helper methods:
+
+```typescript
+// ❌ BAD - Duplicate calculation logic in multiple actions
+calculateFHABorrowingPower: () => {
+  // 271 lines of calculation logic...
+},
+
+calculateFHABorrowingPowerSilent: () => {
+  // Same 271 lines of calculation logic...
+},
+
+// ✅ GOOD - Extract shared logic into private helper
+interface CalculatorStore {
+  // Private helper method
+  _performFHACalculation: (showResults?: boolean) => void;
+  
+  // Public actions call helper with different parameters
+  calculateFHABorrowingPower: () => void;
+  calculateFHABorrowingPowerSilent: () => void;
+}
+
+// Implementation
+const store = create<CalculatorStore>((set, get) => ({
+  _performFHACalculation: (showResults = false) => {
+    // All shared calculation logic here
+    // ... complex DTI and FHA calculations ...
+    
+    set((state) => ({
+      // All shared state updates
+      uiState: { 
+        ...state.uiState, 
+        showResults, // Only difference between methods
+        isCalculating: false 
+      }
+    }));
+  },
+
+  calculateFHABorrowingPower: () => get()._performFHACalculation(true),
+  calculateFHABorrowingPowerSilent: () => get()._performFHACalculation(false),
+}));
+```
+
+**Benefits**:
+- Single source of truth for complex calculations
+- Eliminates risk of logic divergence
+- Reduces maintenance burden
+- Easier testing and debugging
+
 ## What to Store
 
 ### DO Store:

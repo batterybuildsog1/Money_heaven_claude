@@ -523,7 +523,6 @@ export default function CalculatorPage() {
                             const abbr = userInputs.location?.match(/\b([A-Z]{2})\b/)
                             return getRegionFromStateAbbr(abbr?.[1] || undefined)
                           })() || undefined}
-                          totalMonthlyDebts={userInputs.monthlyDebts || 0}
                           dollarsPerDtiPercent={dtiProgressData?.dollarsPerDtiPercent}
                       />
                     ) : (

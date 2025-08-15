@@ -13,10 +13,25 @@ Keep components simple, focused, and reusable. We have three types - stick to th
 ## Rules for Each Type
 
 ### 1. UI Components (/ui)
-**DO NOT MODIFY THESE** - They're from shadcn/ui
-- Copied directly from shadcn/ui
-- Provides base functionality
-- If you need customization, wrap them in calculator components
+**Enhance, Don't Replace** - These are from shadcn/ui
+- Copied directly from shadcn/ui and enhanced as needed
+- Provides base functionality with optional features
+- Add props and variants while preserving core behavior
+- If you need major customization, wrap them in calculator components
+
+**Component Consolidation Rule**: Before creating new components, check if existing ones can be enhanced:
+```typescript
+// ✅ GOOD - Enhance existing Progress component with variants
+interface ProgressProps {
+  value?: number
+  showPercentage?: boolean
+  color?: 'blue' | 'green' | 'yellow' | 'red' | 'default'
+  size?: 'sm' | 'md' | 'lg'
+  animated?: boolean
+}
+
+// ❌ BAD - Create separate ProgressBar component doing the same thing
+```
 
 ### 2. Calculator Components (/calculator)
 Pattern to follow:

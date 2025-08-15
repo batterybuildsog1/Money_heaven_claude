@@ -21,9 +21,73 @@ This directory contains our Convex backend - keep it simple, secure, and type-sa
 ## Core Principles
 1. **One table, one purpose**: Each table has a clear, single responsibility
 2. **Always authenticate**: Every mutation/query checks user identity (for user data)
-3. **Keep it flat**: No complex relationships or joins needed
-4. **Type safety**: Use Convex validators, avoid `any`
-5. **Follow function roles**: External HTTP in actions; DB writes in mutations; cron calls internal functions
+3. **Admin functions secured**: Use `internalMutation` with email-based authorization for admin operations
+4. **Keep it flat**: No complex relationships or joins needed
+5. **Type safety**: Use Convex validators, avoid `any`
+6. **Follow function roles**: External HTTP in actions; DB writes in mutations; cron calls internal functions
+
+## Security Patterns
+
+### Admin Authorization Pattern
+**CRITICAL**: Administrative functions must be properly secured:
+
+```typescript
+// ❌ BAD - Public mutation for admin operations
+export const updateRate = mutation({
+  args: { rate: v.number() },
+  handler: async (ctx, args) => {
+    // No authorization check - anyone can update rates!
+    await ctx.db.insert("mortgageRates", { rate: args.rate });
+  }
+});
+
+// ✅ GOOD - Internal mutation with admin authorization
+export const updateRateInDB = internalMutation({
+  args: { 
+    rate: v.number(),
+    adminEmail: v.string()
+  },
+  handler: async (ctx, args) => {
+    // Verify admin email against allowlist
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    if (!adminEmails.includes(args.adminEmail)) {
+      throw new ConvexError("Unauthorized: Admin access required");
+    }
+    
+    // Validate rate data
+    if (args.rate < 0.01 || args.rate > 0.50) {
+      throw new ConvexError("Invalid rate: must be between 1% and 50%");
+    }
+    
+    await ctx.db.insert("mortgageRates", { 
+      rate: args.rate, 
+      lastUpdated: Date.now() 
+    });
+  }
+});
+
+// Public action that handles authentication
+export const adminUpdateRate = action({
+  args: { rate: v.number() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity?.email) {
+      throw new ConvexError("Authentication required");
+    }
+    
+    return await ctx.runMutation(internal.rates.updateRateInDB, {
+      rate: args.rate,
+      adminEmail: identity.email
+    });
+  }
+});
+```
+
+**Environment Configuration**:
+```bash
+# Set admin emails in Convex environment
+npx convex env set ADMIN_EMAILS "admin@company.com,another-admin@company.com" --prod
+```
 
 ## Pattern to Follow
 

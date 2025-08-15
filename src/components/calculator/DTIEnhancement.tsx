@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { DTIProgressBar } from "./DTIProgressBar";
-import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { formatCurrency } from "../../lib/utils";
 import { DTI_CONSTANTS } from "../../lib/dti-factors";
-import { Check, X, TrendingUp, Wallet } from "lucide-react";
+import { Check, X, TrendingUp } from "lucide-react";
 
 interface DTIEnhancementProps {
   currentDTI: number;
@@ -30,7 +29,6 @@ interface DTIEnhancementProps {
   onUpdateUserInputs?: (updates: Record<string, any>) => void;
   grossMonthlyIncome?: number;
   regionLabel?: 'Northeast' | 'Midwest' | 'South' | 'West';
-  totalMonthlyDebts?: number;
   dollarsPerDtiPercent?: number;
   className?: string;
 }
@@ -44,7 +42,6 @@ export function DTIEnhancement({
   onUpdateUserInputs,
   grossMonthlyIncome,
   regionLabel,
-  totalMonthlyDebts,
   dollarsPerDtiPercent,
   className = ""
 }: DTIEnhancementProps) {

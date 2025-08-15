@@ -9,8 +9,6 @@ export function ConvexClientProvider({ children }: { children: React.ReactNode }
   return (
     <ConvexAuthNextjsProvider 
       client={convex}
-      // Ensure Next proxies our auth routes to Convex hosted auth
-      authUrl={(path) => `/api/auth${path}`}
     >
       {children}
     </ConvexAuthNextjsProvider>

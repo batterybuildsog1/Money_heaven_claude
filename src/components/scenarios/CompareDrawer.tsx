@@ -20,7 +20,12 @@ export function CompareDrawer({ left, right, open, onClose, onLoadLeft, onLoadRi
       {open && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-          <div className="absolute right-0 top-0 h-full w-full max-w-xl border-l bg-background p-4 shadow-xl animate-slide-in">
+          <div 
+            className="absolute right-0 top-0 h-full w-full max-w-xl border-l bg-background p-4 shadow-xl animate-slide-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="compare-drawer-title"
+          >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Compare Scenarios</h2>
               <button onClick={onClose} className="pressable rounded border px-2 py-1 text-sm">Close</button>

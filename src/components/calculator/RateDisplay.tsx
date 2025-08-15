@@ -1,7 +1,7 @@
 "use client";
 
 import { useMortgageRates, useRateErrorState } from "../../hooks/useMortgageRates";
-import { Clock, AlertTriangle, CheckCircle, Wifi, WifiOff } from "lucide-react";
+import { Clock, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 
 export function RateDisplay({ className = "" }: { className?: string }) {
   const { rate, source, lastUpdated, wasFallbackUsed, isLoading } = useMortgageRates();
