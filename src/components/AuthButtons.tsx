@@ -3,14 +3,10 @@
 import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
 import { Button } from "./ui/button";
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/../convex/_generated/api";
-
 export function AuthButtons() {
   const token = useAuthToken();
   const { signIn, signOut } = useAuthActions();
   const [isClient, setIsClient] = useState(false);
-  const currentUser = useQuery(api.users.currentUser);
 
   // Prevent hydration mismatch by not rendering until client-side
   useEffect(() => {
@@ -19,12 +15,6 @@ export function AuthButtons() {
 
   const isLoading = token === undefined;
   const isAuthenticated = useMemo(() => token !== null && token !== undefined && typeof token === "string", [token]);
-
-  useEffect(() => {
-    if (isAuthenticated && currentUser) {
-      console.log("✅ Auth Verified:", currentUser);
-    }
-  }, [isAuthenticated, currentUser]);
 
   const handleSignIn = useCallback(async () => {
     try {
