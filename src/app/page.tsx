@@ -135,13 +135,13 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="text-center p-6 bg-slate-900/50 rounded-xl">
                   <p className="text-slate-400 mb-2">Standard Lenders</p>
-                  <p className="text-4xl font-bold text-slate-500">$326,077</p>
+                  <p className="text-4xl font-bold font-mono text-slate-500">$326,077</p>
                   <p className="text-sm text-slate-500 mt-2">Max home price</p>
                 </div>
                 
                 <div className="text-center p-6 bg-slate-800/40 rounded-xl border border-slate-700/40">
                   <p className="text-sky-300 mb-2">With MoneyBucket</p>
-                  <p className="text-4xl font-bold gradient-steel-text">$417,481</p>
+                  <p className="text-4xl font-bold font-mono gradient-steel-text">$417,481</p>
                   <p className="text-sm text-green-400 mt-2">↑ 28% more buying power</p>
                 </div>
               </div>
