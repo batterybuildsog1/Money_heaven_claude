@@ -22,6 +22,7 @@ import type * as propertyTax from "../propertyTax.js";
 import type * as rates from "../rates.js";
 import type * as scenarios from "../scenarios.js";
 import type * as types from "../types.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   rates: typeof rates;
   scenarios: typeof scenarios;
   types: typeof types;
+  users: typeof users;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
