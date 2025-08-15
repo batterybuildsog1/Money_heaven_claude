@@ -2,7 +2,10 @@ import { generateKeyPair, exportJWK } from "jose";
 import { writeFileSync } from "node:fs";
 
 async function main() {
-  const { privateKey, publicKey } = await generateKeyPair("RS256", { modulusLength: 2048 });
+  const { privateKey, publicKey } = await generateKeyPair("RS256", {
+    modulusLength: 2048,
+    extractable: true,
+  });
   const jwkPrivate = await exportJWK(privateKey);
   const jwkPublic = await exportJWK(publicKey);
 
@@ -24,5 +27,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
-

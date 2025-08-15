@@ -50,3 +50,9 @@ generate-keys.js
 *.tsbuildinfo
 next-env.d.ts
 *.env.backup
+
+jwt_private_key.json
+jwks.json
+
+jwt_private_key.json
+jwks.json
