@@ -17,9 +17,12 @@ function applyTheme(theme: ThemeOption) {
 }
 
 export function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<ThemeOption>("theme-dark");
 
+  // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
+    setMounted(true);
     const stored = (typeof window !== "undefined" && (localStorage.getItem(THEME_STORAGE_KEY) as ThemeOption)) || null;
     const preferred = stored ?? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? "theme-dark" : "theme-light");
     setTheme(preferred);
@@ -27,10 +30,10 @@ export function ThemeSwitcher() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !mounted) return;
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     applyTheme(theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const options = useMemo(
     () => [
@@ -41,6 +44,16 @@ export function ThemeSwitcher() {
     ],
     []
   );
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="inline-flex items-center gap-2">
+        <label className="text-sm text-muted-foreground">Theme</label>
+        <div className="h-9 w-24 rounded-md border bg-background px-2 text-sm"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="inline-flex items-center gap-2">

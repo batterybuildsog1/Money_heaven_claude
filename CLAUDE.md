@@ -31,6 +31,128 @@ vercel --prod --yes        # Deploy to Vercel
 - **Check server status first** before attempting to start them - look for existing processes or port conflicts
 - Only restart servers if explicitly requested or if there's evidence they're not running (e.g., connection errors)
 
+## Systematic Bug Investigation Framework
+
+### Agent-Based Debugging Process
+
+When encountering critical bugs, use parallel agents to investigate thoroughly and find root causes rather than surface symptoms.
+
+#### Quick Deploy: Critical Bug Investigation
+
+```typescript
+// Template for deploying bug investigation agents
+Task({
+  subagent_type: "general-purpose",
+  description: "Critical bug investigation",
+  prompt: `CRITICAL BUG INVESTIGATION: [Bug Description]
+
+Your mission is to investigate [specific issue]. Think hard and be thorough - find the ROOT CAUSE, not just surface issues.
+
+INVESTIGATION STEPS:
+1. Search the codebase for all [component/system]-related files
+2. Look for [specific patterns/configurations]
+3. Check for console errors or warnings related to [area]
+4. Examine [specific implementation details]
+5. Use context7 to research [framework] best practices
+6. Search online for common [issue type] in [tech stack]
+
+DELIVERABLES:
+- Exact file paths and line numbers where issues exist
+- Root cause analysis (not just symptoms)
+- Specific resolution plan with implementation steps
+- Best practices recommendations from research
+- Any related issues discovered during investigation
+
+Be comprehensive - find the core architectural issue causing [specific impact].`
+})
+```
+
+#### Proven Investigation Categories
+
+**1. Authentication/Button Functionality Issues**
+- **Common Root Cause**: Configuration mismatches (environment variables, OAuth URLs)
+- **Investigation Focus**: Convex URL alignment, environment variable consistency
+- **Critical Files**: `.env.local`, `layout.tsx`, `AuthButtons.tsx`, OAuth console settings
+
+**2. Theme/Styling Issues**
+- **Common Root Cause**: CSS specificity conflicts, hardcoded classes, hydration mismatches
+- **Investigation Focus**: CSS rule conflicts, SSR/client hydration differences
+- **Critical Files**: `globals.css`, `layout.tsx`, theme components, component styling
+
+**3. State Management Issues**
+- **Common Root Cause**: Provider wrapping, context initialization, hydration timing
+- **Investigation Focus**: React context setup, Zustand store configuration
+- **Critical Files**: Store definitions, provider components, hook implementations
+
+#### Agent Deployment Best Practices
+
+**For Parallel Investigations**:
+1. **Launch 3+ agents simultaneously** for complex multi-system issues
+2. **Assign specific domains** to each agent (auth, styling, state, etc.)
+3. **Require root cause analysis** - not just symptom identification
+4. **Demand implementation steps** - specific file paths and code changes
+5. **Request best practice research** using context7 and web search
+
+**Agent Prompt Structure**:
+```
+MISSION: [Clear, specific objective]
+INVESTIGATION STEPS: [Numbered checklist]
+DELIVERABLES: [Specific outputs required]
+CONTEXT: [Any relevant background]
+URGENCY: [Impact and user experience implications]
+```
+
+#### Verified Resolution Patterns
+
+**Configuration Mismatches** (High Impact):
+- Symptoms: Widespread functionality failure, silent errors
+- Investigation: Compare documented vs. actual environment variables
+- Resolution: Align configuration across all environments
+- Prevention: Add startup validation checks
+
+**CSS Conflicts** (Visual/UX Impact):
+- Symptoms: Styling not applying, theme switching failures
+- Investigation: Check specificity conflicts, hydration differences
+- Resolution: Remove conflicting rules, fix SSR/client mismatches
+- Prevention: Use design system constraints, avoid arbitrary values
+
+**Authentication Cascade Failures** (Security/Access):
+- Symptoms: All protected features non-functional
+- Investigation: Trace auth provider setup, token management
+- Resolution: Fix provider configuration, validate OAuth setup
+- Prevention: Add auth health checks, better error boundaries
+
+#### Emergency Debugging Checklist
+
+When **all buttons/functionality breaks**:
+1. ✅ Check environment variable alignment with documentation
+2. ✅ Verify authentication provider configuration
+3. ✅ Confirm OAuth redirect URLs match exactly
+4. ✅ Test basic Convex connection health
+5. ✅ Validate no CSS pointer-events blocking interactions
+
+When **themes don't apply**:
+1. ✅ Check for hardcoded theme classes in layout
+2. ✅ Verify CSS specificity conflicts (html.theme vs .theme)
+3. ✅ Confirm hydration protection in theme components
+4. ✅ Test localStorage persistence functionality
+
+When **deployment breaks authentication**:
+1. ✅ Never use `vercel --prod` (breaks auth URLs)
+2. ✅ Ensure CONVEX_DEPLOY_KEY only enabled for Production environment
+3. ✅ Verify OAuth redirect URLs match deployment URLs
+4. ✅ Check environment variable propagation
+
+#### Documentation Requirements
+
+After each bug investigation:
+1. **Update this checklist** with new patterns discovered
+2. **Document root causes** in relevant component sections
+3. **Add prevention measures** to development guidelines
+4. **Create test cases** for critical failure modes
+
+This framework ensures systematic investigation that finds architectural issues causing widespread failures, not just surface-level symptoms.
+
 ## High-Level Architecture
 
 ### Tech Stack Overview
