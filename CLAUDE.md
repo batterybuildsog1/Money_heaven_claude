@@ -2,19 +2,19 @@
 
 This document provides an overview of the key architectural decisions and implementation details for the Money Heaven application.
 
-## Authentication
+## Authentication (Option A — Convex‑native)
 
-Our authentication system is built using the `@convex-dev/auth` library, which employs a hybrid architecture that leverages both Next.js Middleware and the Convex backend.
+Single source of truth is Convex. Next.js only gates routes and renders UI.
 
 ### Core Components:
 
 1.  **`convex/auth.ts`**: This is the central configuration file for the authentication system. It defines the OAuth providers (e.g., Google) and exports the necessary functions for use in both the Convex backend and the Next.js frontend.
 
-2.  **`src/middleware.ts`**: This is the gatekeeper for our application. It runs on every request to a protected page or the auth API route. Its primary jobs are:
+2.  **`src/middleware.ts`**: Gatekeeper for protected pages and the auth API route. Primary jobs:
     *   To manage session persistence by validating the user's session cookie.
     *   To protect routes by redirecting unauthenticated users away from protected pages.
     *   To improve UX by redirecting authenticated users away from public pages like the homepage.
-    *   To intercept and handle the interactive auth API calls (like `/api/auth/signin/google`) initiated from the client.
+    *   To intercept and forward interactive auth API calls (like `/api/auth/signin/google`) to Convex.
 
 3.  **`src/app/layout.tsx` & `src/lib/convex.tsx`**: These files work together to bridge the server-side and client-side authentication states. The `ConvexAuthNextjsServerProvider` in the layout ensures that the initial authentication status determined by the middleware is correctly passed down ("hydrated") to the client-side React application.
 
@@ -22,7 +22,16 @@ Our authentication system is built using the `@convex-dev/auth` library, which e
 
 ### Key Environment Variables (Production):
 
-*   `JWT_PRIVATE_KEY`: A **PKCS#8 formatted** private key used by the Convex backend to sign session tokens (JWTs). This must be a multi-line value.
-*   `JWKS`: A **JWK Set JSON object** containing the public key, used by the backend to verify the tokens it signs.
+On Vercel (Next.js):
+* `CONVEX_URL` and `NEXT_PUBLIC_CONVEX_URL` = `https://<deployment>.convex.cloud`
+* `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+* `JWKS`, `JWT_PRIVATE_KEY` (PKCS#8)
+* `AUTH_ORIGIN` = `https://<your-app-domain>`
+* `AUTH_TRUST_HOST` = `true`
+
+On Convex:
+* `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+* `JWKS`, `JWT_PRIVATE_KEY`
+* `AUTH_ORIGIN` = `https://<your-app-domain>`
 
 This setup provides a secure, robust, and seamless authentication experience.
