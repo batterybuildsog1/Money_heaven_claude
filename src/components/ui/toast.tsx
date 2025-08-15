@@ -24,7 +24,10 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mounted, setMounted] = useState(false);
   const counter = useRef(0);
+
+  useEffect(() => setMounted(true), []);
 
   const toast = useCallback((options: ToastOptions) => {
     const id = `t_${Date.now()}_${counter.current++}`;
@@ -47,7 +50,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      {createPortal(<ToastViewport toasts={toasts} />, document.body)}
+      {mounted && typeof document !== 'undefined' && createPortal(<ToastViewport toasts={toasts} />, document.body)}
     </ToastContext.Provider>
   );
 }

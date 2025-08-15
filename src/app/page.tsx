@@ -1,7 +1,6 @@
 "use client";
 import { useAuthActions, useAuthToken } from "@convex-dev/auth/react";
 import Link from 'next/link';
-import Image from 'next/image';
 import { Calculator, TrendingUp, Shield, Home as HomeIcon, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -31,17 +30,9 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 overflow-hidden">
-        {/* Background Image Effect */}
+        {/* Background Effect */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900/80" />
-          <Image 
-            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop" 
-            alt="Modern house"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-            className="object-cover opacity-30 lg:object-right"
-            priority
-          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700" />
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-6">

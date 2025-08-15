@@ -62,8 +62,10 @@ vercel --prod --yes        # Deploy to Vercel
 3. **Convex Backend**:
    - Schema defined in `/convex/schema.ts`
    - Scenario CRUD operations in `/convex/scenarios.ts`
-   - Authentication via Convex Auth
+   - Authentication via Convex Auth with Google OAuth only
    - All queries/mutations filtered by userId
+   - **Admin Security**: Admin functions use `internalMutation` with email-based authorization
+   - **Pattern**: External HTTP in actions; DB writes in mutations; cron calls internal functions
 
 4. **API Routes**:
    - `/src/app/api/zipcode/route.ts` - ZIP to location lookup via API Ninjas
@@ -112,6 +114,26 @@ vercel --prod --yes        # Deploy to Vercel
    - Visual progress bar updates in real-time
    - Recommendations generated based on user situation
 
+5. **Hybrid Caching Pattern** (for external API responses):
+   - **Problem**: External API calls can't be cached by Convex's automatic query caching
+   - **Solution**: Database-backed cache with auto-expiration
+   - **Pattern**: Query cache first → On miss, call action → Store results
+   - **Implementation**: See `property-tax.ts` and `convex/propertyTax.ts`
+   ```typescript
+   // Example pattern
+   export async function getPropertyTaxRate(location: string) {
+     const cached = await convexClient.query(api.propertyTax.getCachedRate, { location })
+     if (cached) return cached
+     const fresh = await convexClient.action(api.xai.getPropertyTaxRate, { location })
+     return fresh // Action stores result for next time
+   }
+   ```
+
+6. **Critical Business Logic**:
+   - **DTI Comparison**: Standard lenders comparison uses 45% DTI, NOT 43%
+   - This is intentional for industry standard comparison purposes
+   - Located in calculator page ~line 555: `standardAmount={Math.round((results.maxHomePrice || 0) * (45 / (results.debtToIncomeRatio || 50)))}`
+
 ### Important Constraints
 
 1. **UI/UX Requirements**:
@@ -129,6 +151,20 @@ vercel --prod --yes        # Deploy to Vercel
    - API keys stored in environment variables
    - All Convex queries filtered by authenticated userId
    - No client-side API calls to paid services
+   - **Admin Authorization Pattern**: Use `internalMutation` with email-based authorization
+   ```typescript
+   // Example: Admin functions must check email against allowlist
+   export const updateRateInDB = internalMutation({
+     args: { rate: v.number(), adminEmail: v.string() },
+     handler: async (ctx, args) => {
+       const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+       if (!adminEmails.includes(args.adminEmail)) {
+         throw new ConvexError("Unauthorized: Admin access required");
+       }
+       // Proceed with admin operation
+     }
+   });
+   ```
 
 ## Product Requirements Document (PRD) v2
 
@@ -945,6 +981,24 @@ XAI_API_KEY=your-xai-key
 - Auth callbacks are tied to specific URLs
 - Cookie domains get confused between deployments
 - Always check existing deployment first with `vercel ls`
+
+### Critical Environment Variable Configuration:
+**🚨 CONVEX_DEPLOY_KEY Configuration:**
+- Must ONLY be enabled for **Production** environment in Vercel
+- ❌ Uncheck Development and Preview  
+- ✅ Check Production only
+- Failure to configure correctly causes: "Detected a non-production build environment" error
+
+### Google OAuth Setup Requirements:
+**Authorized Redirect URI (EXACT):**
+- https://calm-ibis-514.convex.site/api/auth/callback/google
+
+### Troubleshooting Commands:
+```bash
+npx convex logs --prod    # Convex function logs
+vercel logs              # Vercel deployment logs
+npx convex env list      # View environment variables
+```
 
 ## Maintenance Notes
 
