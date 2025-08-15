@@ -18,6 +18,15 @@ export function NavBar() {
   const token = useAuthToken();
   const isAuthenticated = !!token;
 
+  if (typeof window !== "undefined") {
+    // Minimal client-side trace for nav visibility and active route
+    // eslint-disable-next-line no-console
+    console.debug("MH:navbar", {
+      pathname,
+      isAuthenticated,
+    });
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
@@ -33,6 +42,7 @@ export function NavBar() {
                   key={item.href}
                   className="text-sm text-muted-foreground/50 cursor-not-allowed"
                   title="Sign in required"
+                  onClick={() => console.debug("MH:navbar:click:blocked", { href: item.href })}
                 >
                   {item.label}
                 </span>
@@ -43,6 +53,7 @@ export function NavBar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => console.debug("MH:navbar:click", { href: item.href })}
                 className={`text-sm transition-colors hover:text-foreground ${active ? "text-foreground" : "text-muted-foreground"}`}
                 aria-current={active ? "page" : undefined}
               >

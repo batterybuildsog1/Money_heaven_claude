@@ -54,6 +54,8 @@ export default function CalculatorPage() {
 
   // Handle step navigation
   const handleNext = async () => {
+    // eslint-disable-next-line no-console
+    console.debug("MH:calc:next", { currentStep, totalSteps });
     if (currentStep === totalSteps) {
       // Calculate on final step
       await calculateBorrowingPower();
@@ -63,34 +65,50 @@ export default function CalculatorPage() {
   };
 
   const handlePrevious = () => {
+    // eslint-disable-next-line no-console
+    console.debug("MH:calc:prev", { currentStep });
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const calculateBorrowingPower = async () => {
+    // eslint-disable-next-line no-console
+    console.debug("MH:calc:start");
     setIsCalculating(true);
     setUIState({ isCalculating: true });
 
     try {
       // First calculate FHA borrowing power to get max home price
       calculateFHABorrowingPower();
+      // eslint-disable-next-line no-console
+      console.debug("MH:calc:afterInitial", { maxHomePrice: useCalculatorStore.getState().results.maxHomePrice });
       
       // Then use calculated max home price for property tax and insurance
       const state = useCalculatorStore.getState();
       if (userInputs.location && state.results.maxHomePrice) {
         // Update homeValue with calculated max home price
         updateUserInputs({ homeValue: state.results.maxHomePrice });
+        // eslint-disable-next-line no-console
+        console.debug("MH:calc:updateHomeValue", { homeValue: state.results.maxHomePrice });
         
         // Now calculate property tax and insurance
         await state.calculatePropertyTax();
+        // eslint-disable-next-line no-console
+        console.debug("MH:calc:afterTax");
         await state.calculateInsurance();
+        // eslint-disable-next-line no-console
+        console.debug("MH:calc:afterInsurance");
         
         // Recalculate with updated property tax and insurance
         calculateFHABorrowingPower();
+        // eslint-disable-next-line no-console
+        console.debug("MH:calc:afterRecalc", { maxHomePrice: useCalculatorStore.getState().results.maxHomePrice });
       }
       
       setUIState({ showResults: true });
+      // eslint-disable-next-line no-console
+      console.debug("MH:calc:complete");
       success("Calculation complete");
     } finally {
       setIsCalculating(false);

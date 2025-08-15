@@ -1,26 +1,26 @@
-import { generateKeyPair, exportJWK } from "jose";
+import { exportJWK, exportPKCS8, generateKeyPair } from "jose";
 import { writeFileSync } from "node:fs";
 
 async function main() {
-  const { privateKey, publicKey } = await generateKeyPair("RS256", {
-    modulusLength: 2048,
+  const keys = await generateKeyPair("RS256", {
     extractable: true,
   });
-  const jwkPrivate = await exportJWK(privateKey);
-  const jwkPublic = await exportJWK(publicKey);
+  const privateKey = await exportPKCS8(keys.privateKey);
+  const publicKey = await exportJWK(keys.publicKey);
+  const jwks = JSON.stringify({ keys: [{ use: "sig", ...publicKey }] });
 
-  // Assign a key id to aid future rotation
-  const kid = "mh-1";
-  jwkPrivate.kid = kid;
-  jwkPublic.kid = kid;
+  // For environment variables, the private key needs newlines replaced
+  const privateKeyForEnv = privateKey.trimEnd().replace(/\n/g, " ");
 
-  const privateJson = JSON.stringify(jwkPrivate);
-  const jwksJson = JSON.stringify({ keys: [jwkPublic] });
+  // Write to files for local use or inspection
+  writeFileSync("./jwt_private_key.pkcs8", privateKey);
+  writeFileSync("./jwks.json", jwks);
 
-  writeFileSync("./jwt_private_key.json", privateJson);
-  writeFileSync("./jwks.json", jwksJson);
-
-  console.log("Wrote jwt_private_key.json and jwks.json");
+  console.log("Wrote jwt_private_key.pkcs8 and jwks.json");
+  console.log("\n--- Copy the following for Convex environment variables ---");
+  console.log(`JWT_PRIVATE_KEY="${privateKeyForEnv}"`);
+  console.log(`JWKS='${jwks}'`);
+  console.log("----------------------------------------------------------");
 }
 
 main().catch((err) => {

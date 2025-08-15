@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ConvexClientProvider } from '../lib/convex';
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { NavBar } from "../components/NavBar";
+import { RouteLogger } from "../components/RouteLogger";
 import "./globals.css";
 import { ToastProvider } from "../components/ui/toast";
 import { ThemeProvider } from "next-themes";
@@ -62,6 +63,8 @@ export default function RootLayout({
           <ConvexAuthNextjsServerProvider>
             <ConvexClientProvider>
               <ToastProvider>
+                {/* Debug: log route transitions and auth token presence */}
+                <RouteLogger />
                 <NavBar />
                 <main id="main-content">{children}</main>
               </ToastProvider>

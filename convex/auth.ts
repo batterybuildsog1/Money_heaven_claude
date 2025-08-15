@@ -10,6 +10,7 @@ export const authConfig = {
   ],
 };
 
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth(authConfig);
+export const { auth, signIn, signOut, store, isAuthenticated } =
+  convexAuth(authConfig);
 
 export type Auth = typeof auth;

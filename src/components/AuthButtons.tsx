@@ -22,7 +22,11 @@ export function AuthButtons() {
         typeof window !== "undefined" && window.location.pathname === "/" 
           ? "/calculator" 
           : window.location.pathname || "/calculator";
+      // eslint-disable-next-line no-console
+      console.debug("MH:signin:start", { redirectTo });
       await signIn("google", { redirectTo });
+      // eslint-disable-next-line no-console
+      console.debug("MH:signin:done");
     } catch (err) {
       console.error("❌ AuthButtons: sign-in error", err);
     }
@@ -30,7 +34,11 @@ export function AuthButtons() {
 
   const handleSignOut = useCallback(async () => {
     try {
+      // eslint-disable-next-line no-console
+      console.debug("MH:signout:start");
       await signOut();
+      // eslint-disable-next-line no-console
+      console.debug("MH:signout:done");
     } catch (err) {
       console.error("❌ AuthButtons: sign-out error", err);
     }

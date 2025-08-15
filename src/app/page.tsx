@@ -26,7 +26,11 @@ export default function Home() {
         typeof window !== 'undefined' && window.location.pathname === '/' 
           ? '/calculator' 
           : (typeof window !== 'undefined' ? window.location.pathname : '/calculator');
+      // eslint-disable-next-line no-console
+      console.debug('MH:home:signin:start', { redirectTo });
       await signIn('google', { redirectTo });
+      // eslint-disable-next-line no-console
+      console.debug('MH:home:signin:done');
     } catch (err) {
       console.error('❌ Home CTA: sign-in error', err);
     }
@@ -66,7 +70,7 @@ export default function Home() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               ) : (
-                <Link href="/calculator">
+                <Link href="/calculator" onClick={() => console.debug('MH:home:cta:click', { to: '/calculator' })}>
                   <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 shadow-lg transition-all duration-200">
                     Start Calculating
                     <Calculator className="ml-2 h-5 w-5" />
@@ -288,7 +292,7 @@ export default function Home() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           ) : (
-            <Link href="/calculator">
+            <Link href="/calculator" onClick={() => console.debug('MH:home:cta2:click', { to: '/calculator' })}>
               <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 text-lg px-8 py-4 shadow-lg transition-all duration-200">
                 Start Calculating Now
                 <Calculator className="ml-2 h-5 w-5" />

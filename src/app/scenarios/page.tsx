@@ -181,11 +181,15 @@ export default function ScenariosPage() {
 
   const loadToCalculator = (s: Doc<"scenarios">) => {
     try {
+      // eslint-disable-next-line no-console
+      console.debug("MH:scenarios:load", { id: String(s._id) });
       updateUserInputs(s.inputs || {});
       updateCompensatingFactors(s.compensatingFactors || {});
       if (s.results) setResults(s.results);
       setUIState({ showResults: true });
       success("Loaded in calculator");
+      // eslint-disable-next-line no-console
+      console.debug("MH:scenarios:navigate", { to: "/calculator" });
       router.push("/calculator");
     } catch {
       error("Load failed");

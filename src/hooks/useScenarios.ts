@@ -5,6 +5,10 @@ import { UserInputs, CompensatingFactors, CalculationResults } from "../types";
 
 export function useScenarios() {
   const scenarios = useQuery(api.scenarios.list);
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.debug("MH:useScenarios:list", { count: Array.isArray(scenarios) ? scenarios.length : scenarios });
+  }
   const createScenario = useMutation(api.scenarios.create);
   const updateScenario = useMutation(api.scenarios.update);
   const deleteScenario = useMutation(api.scenarios.remove);
