@@ -11,7 +11,20 @@ if (process.env.GOOGLE_CLIENT_ID) {
 // --- END AUTH DEBUGGING ---
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Google],
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          redirect_uri:
+            (process.env.AUTH_ORIGIN ??
+              process.env.NEXT_PUBLIC_CONVEX_URL) +
+            "/api/auth/callback/google",
+        },
+      },
+    }),
+  ],
   callbacks: {
     async redirect({ redirectTo }) {
       // Environment-aware redirect logic
