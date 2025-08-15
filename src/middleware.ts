@@ -22,6 +22,11 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 });
 
 export const config = {
-  // Standard Convex Auth matcher - includes auth API routes
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/",
+    "/dashboard/:path*",
+    "/calculator/:path*",
+    "/scenarios/:path*",
+    "/admin/:path*",
+  ],
 };
