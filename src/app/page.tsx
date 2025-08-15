@@ -13,12 +13,27 @@ export default function Home() {
   // Prevent hydration mismatch by not rendering auth-dependent UI until client-side
   useEffect(() => {
     setIsClient(true);
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('MH:home:mount', {
+        env: {
+          convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ? 'set' : 'missing'
+        }
+      });
+    } catch {}
   }, []);
 
   // Important: undefined means loading, null means not authenticated
   // typeof null === 'object' in JavaScript, so we must check explicitly
   const isLoading = token === undefined;
   const isAuthenticated = token !== null && token !== undefined && typeof token === 'string';
+  try {
+    // eslint-disable-next-line no-console
+    console.debug('MH:home:authstate', {
+      token: token === undefined ? 'undefined' : token === null ? 'null' : 'present',
+      isAuthenticated
+    });
+  } catch {}
   const { signIn } = useAuthActions();
   const handleCtaSignIn = async () => {
     try {

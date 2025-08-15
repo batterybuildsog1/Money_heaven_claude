@@ -46,6 +46,8 @@ export function AuthButtons() {
 
   // Render placeholder during SSR and initial hydration
   if (!isClient || isLoading) {
+    // eslint-disable-next-line no-console
+    console.debug("MH:authbuttons:loading", { token: token === undefined ? "undefined" : token === null ? "null" : "present" });
     return <div className="h-9 w-20 bg-background"></div>;
   }
 

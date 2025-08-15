@@ -13,10 +13,27 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   const isAuthenticated = await convexAuth.isAuthenticated();
   // Lightweight server-side log for routing decisions
   // Note: console statements in middleware show in server logs
-  console.debug("MH:middleware", {
-    path: request.nextUrl.pathname,
-    isAuthenticated,
-  });
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const cookieNames = cookieHeader
+      .split(";")
+      .map((c) => c.split("=")[0]?.trim())
+      .filter((n) => n);
+    console.debug("MH:middleware", {
+      path: request.nextUrl.pathname,
+      isAuthenticated,
+      cookies: cookieNames.slice(0, 12),
+      env: {
+        convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ? "set" : "missing",
+        googleClientId: !!process.env.GOOGLE_CLIENT_ID,
+        googleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        jwks: !!process.env.JWKS,
+        jwtPrivateKey: !!process.env.JWT_PRIVATE_KEY,
+      },
+    });
+  } catch (e) {
+    console.debug("MH:middleware:log_error", String(e));
+  }
 
   if (isPublicPage(request) && isAuthenticated) {
     console.debug("MH:middleware:redirect", { from: request.nextUrl.pathname, to: "/calculator" });
