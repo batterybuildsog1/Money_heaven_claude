@@ -1,6 +1,15 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import Google from "@auth/core/providers/google";
 
+// --- BEGIN AUTH DEBUGGING ---
+console.log("Auth.ts loaded");
+console.log(`GOOGLE_CLIENT_ID: ${process.env.GOOGLE_CLIENT_ID ? "Set" : "Not Set"}`);
+console.log(`GOOGLE_CLIENT_SECRET: ${process.env.GOOGLE_CLIENT_SECRET ? "Set" : "Not Set"}`);
+if (process.env.GOOGLE_CLIENT_ID) {
+  console.log(`GOOGLE_CLIENT_ID (first 5 chars): ${process.env.GOOGLE_CLIENT_ID.substring(0, 5)}`);
+}
+// --- END AUTH DEBUGGING ---
+
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Google],
   callbacks: {
@@ -28,4 +37,3 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 });
 
 export type Auth = typeof auth;
-
