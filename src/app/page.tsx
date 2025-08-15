@@ -59,7 +59,7 @@ export default function Home() {
               ) : !isAuthenticated ? (
                 <Button
                   size="lg"
-                  className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 shadow-lg transition-all duration-200"
                   onClick={handleCtaSignIn}
                 >
                   Sign Up for Free
@@ -67,7 +67,7 @@ export default function Home() {
                 </Button>
               ) : (
                 <Link href="/calculator">
-                  <Button size="lg" className="gradient-steel hover:opacity-90 text-white text-lg px-8 py-4 shadow-dark-xl glow-steel">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 shadow-lg transition-all duration-200">
                     Start Calculating
                     <Calculator className="ml-2 h-5 w-5" />
                   </Button>
@@ -133,15 +133,15 @@ export default function Home() {
               </div>
               
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="text-center p-6 bg-slate-900/50 rounded-xl">
+                <div className="text-center p-6 bg-slate-900/50 rounded-xl border border-slate-700/30">
                   <p className="text-slate-400 mb-2">Standard Lenders</p>
-                  <p className="text-4xl font-bold font-mono text-slate-500">$326,077</p>
+                  <p className="text-4xl font-bold font-mono text-slate-400">$326,077</p>
                   <p className="text-sm text-slate-500 mt-2">Max home price</p>
                 </div>
                 
-                <div className="text-center p-6 bg-slate-800/40 rounded-xl border border-slate-700/40">
-                  <p className="text-sky-300 mb-2">With MoneyBucket</p>
-                  <p className="text-4xl font-bold font-mono gradient-steel-text">$417,481</p>
+                <div className="text-center p-6 bg-blue-600/10 rounded-xl border border-blue-500/30">
+                  <p className="text-blue-300 mb-2">With MoneyBucket</p>
+                  <p className="text-4xl font-bold font-mono text-blue-100">$417,481</p>
                   <p className="text-sm text-green-400 mt-2">↑ 28% more buying power</p>
                 </div>
               </div>
@@ -283,13 +283,13 @@ export default function Home() {
             {!isClient || isLoading ? (
             <div className="h-12 w-48 bg-white/20 rounded-lg animate-pulse mx-auto"></div>
           ) : !isAuthenticated ? (
-            <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl" onClick={handleCtaSignIn}>
+            <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 text-lg px-8 py-4 shadow-lg transition-all duration-200" onClick={handleCtaSignIn}>
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           ) : (
             <Link href="/calculator">
-              <Button size="lg" className="bg-white text-sky-700 hover:bg-slate-100 text-lg px-8 py-4 shadow-dark-xl">
+              <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 text-lg px-8 py-4 shadow-lg transition-all duration-200">
                 Start Calculating Now
                 <Calculator className="ml-2 h-5 w-5" />
               </Button>
