@@ -110,62 +110,88 @@
   --chart-5: oklch(0.76 0.08 35);
 }
 
-/* New variant: STEEL (graphite/steel with sky accents) */
-.steel {
-  color-scheme: dark;
-  --background: oklch(0.19 0 255);
-  --foreground: oklch(0.96 0 255);
-  --card: oklch(0.22 0 255);
-  --card-foreground: oklch(0.96 0 255);
-  --popover: oklch(0.22 0 255);
-  --popover-foreground: oklch(0.96 0 255);
-  --primary: oklch(0.72 0.12 225); /* sky/steel */
-  --primary-foreground: oklch(0.13 0 255);
-  --secondary: oklch(0.28 0 255);
-  --secondary-foreground: oklch(0.96 0 255);
-  --muted: oklch(0.28 0 255);
-  --muted-foreground: oklch(0.78 0 255);
-  --accent: oklch(0.3 0.03 225);
-  --accent-foreground: oklch(0.96 0 255);
-  --destructive: oklch(0.67 0.2 25);
-  --border: oklch(0.4 0 255);
-  --input: oklch(0.34 0 255);
-  --ring: oklch(0.64 0.06 225);
-
-  --chart-1: oklch(0.7 0.12 225);
-  --chart-2: oklch(0.68 0.09 210);
-  --chart-3: oklch(0.66 0.08 195);
-  --chart-4: oklch(0.74 0.07 180);
-  --chart-5: oklch(0.78 0.06 160);
+/* SOPHISTICATED LIGHT THEME - Inspired by Signal Design + MOYO Echo Hero */
+.light {
+  color-scheme: light;
+  
+  /* Sophisticated Light Palette */
+  --background: oklch(0.99 0 0);           /* Pure white */
+  --foreground: oklch(0.15 0 0);           /* Deep charcoal */
+  --card: oklch(0.98 0 0);                 /* Off-white cards */
+  --card-foreground: oklch(0.2 0 0);       /* Dark text on cards */
+  --popover: oklch(1 0 0);                 /* Pure white popovers */
+  --popover-foreground: oklch(0.2 0 0);    /* Dark text */
+  
+  /* Financial Trust Blue - Inspired by MOYO */
+  --primary: oklch(0.46 0.08 240);         /* Professional blue */
+  --primary-foreground: oklch(0.99 0 0);   /* White text on blue */
+  
+  /* Subtle Grays */
+  --secondary: oklch(0.94 0 0);            /* Light gray */
+  --secondary-foreground: oklch(0.3 0 0);  /* Dark text */
+  --muted: oklch(0.96 0 0);                /* Very light gray */
+  --muted-foreground: oklch(0.5 0 0);      /* Medium gray text */
+  --accent: oklch(0.93 0 0);               /* Accent background */
+  --accent-foreground: oklch(0.3 0 0);     /* Dark accent text */
+  
+  /* Semantic Colors */
+  --destructive: oklch(0.6 0.2 25);        /* Warm red */
+  --success: oklch(0.55 0.12 145);         /* Professional green */
+  --warning: oklch(0.7 0.15 85);           /* Warm amber */
+  
+  /* Interface Elements */
+  --border: oklch(0.9 0 0);                /* Light borders */
+  --input: oklch(0.97 0 0);                /* Input backgrounds */
+  --ring: oklch(0.46 0.08 240);            /* Focus rings (primary color) */
+  
+  /* Charts - Financial Theme */
+  --chart-1: oklch(0.46 0.08 240);         /* Primary blue */
+  --chart-2: oklch(0.55 0.12 145);         /* Success green */
+  --chart-3: oklch(0.7 0.15 85);           /* Warning amber */
+  --chart-4: oklch(0.6 0.2 25);            /* Error red */
+  --chart-5: oklch(0.5 0.1 285);           /* Accent purple */
 }
 
-/* New variant: PRISMATIC (neutral base with subtle multi‑hue accent) */
-.prismatic {
+/* SOPHISTICATED DARK THEME - Inspired by Obriy Sarmat + Apollo Studio */
+.dark {
   color-scheme: dark;
-  --background: oklch(0.18 0 255);
-  --foreground: oklch(0.97 0 255);
-  --card: oklch(0.22 0 255);
-  --card-foreground: oklch(0.97 0 255);
-  --popover: oklch(0.22 0 255);
-  --popover-foreground: oklch(0.97 0 255);
-  --primary: oklch(0.72 0.11 240); /* calm blue base */
-  --primary-foreground: oklch(0.12 0 255);
-  --secondary: oklch(0.28 0 255);
-  --secondary-foreground: oklch(0.97 0 255);
-  --muted: oklch(0.28 0 255);
-  --muted-foreground: oklch(0.78 0 255);
-  --accent: oklch(0.72 0.14 205); /* subtle teal */
-  --accent-foreground: oklch(0.12 0 255);
-  --destructive: oklch(0.67 0.2 25);
-  --border: oklch(0.4 0 255);
-  --input: oklch(0.34 0 255);
-  --ring: oklch(0.64 0.06 230);
-
-  --chart-1: oklch(0.68 0.13 240);
-  --chart-2: oklch(0.69 0.12 205);
-  --chart-3: oklch(0.71 0.11 160);
-  --chart-4: oklch(0.76 0.09 110);
-  --chart-5: oklch(0.78 0.08 70);
+  
+  /* Deep Professional Base - Obriy Sarmat Inspired */
+  --background: oklch(0.11 0 0);           /* Deep black */
+  --foreground: oklch(0.98 0 0);           /* Pure white text */
+  --card: oklch(0.15 0 0);                 /* Charcoal cards */
+  --card-foreground: oklch(0.98 0 0);      /* White text on cards */
+  --popover: oklch(0.15 0 0);              /* Dark popovers */
+  --popover-foreground: oklch(0.98 0 0);   /* White text */
+  
+  /* Vibrant Accent - Apollo Studio Inspired */
+  --primary: oklch(0.65 0.12 240);         /* Bright blue */
+  --primary-foreground: oklch(0.98 0 0);   /* White text */
+  
+  /* Professional Grays */
+  --secondary: oklch(0.26 0 0);            /* Dark gray */
+  --secondary-foreground: oklch(0.98 0 0); /* White text */
+  --muted: oklch(0.26 0 0);                /* Muted background */
+  --muted-foreground: oklch(0.72 0 0);     /* Light gray text */
+  --accent: oklch(0.26 0 0);               /* Accent background */
+  --accent-foreground: oklch(0.98 0 0);    /* White accent text */
+  
+  /* Semantic Colors - Enhanced for Dark */
+  --destructive: oklch(0.7 0.2 25);        /* Bright red */
+  --success: oklch(0.6 0.15 145);          /* Vibrant green */
+  --warning: oklch(0.75 0.18 85);          /* Bright amber */
+  
+  /* Interface Elements */
+  --border: oklch(0.4 0 0);                /* Medium gray borders */
+  --input: oklch(0.2 0 0);                 /* Dark input backgrounds */
+  --ring: oklch(0.65 0.12 240);            /* Bright focus rings */
+  
+  /* Charts - Enhanced for Dark Theme */
+  --chart-1: oklch(0.65 0.12 240);         /* Bright blue */
+  --chart-2: oklch(0.6 0.15 145);          /* Vibrant green */
+  --chart-3: oklch(0.75 0.18 85);          /* Bright amber */
+  --chart-4: oklch(0.7 0.2 25);            /* Bright red */
+  --chart-5: oklch(0.65 0.15 285);         /* Bright purple */
 }
 
 :root {

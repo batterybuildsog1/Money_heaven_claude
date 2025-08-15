@@ -54,7 +54,7 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          themes={["light", "dark", "steel", "prismatic"]}
+          themes={["light", "dark"]}
           storageKey="app-theme"
           enableSystem={true}
           disableTransitionOnChange={false}

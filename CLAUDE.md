@@ -553,6 +553,213 @@ transition: background-color 200ms ease;
    - Single responsibility per component
    - No wrapper hell or unnecessary nesting
 
+## Design Inspiration & Aesthetic Direction
+
+### Design Philosophy & Research Foundation
+
+Our visual design draws inspiration from the most sophisticated financial and technology interfaces of 2024-2025, combining trust-building aesthetics with cutting-edge design trends. Based on comprehensive analysis of industry-leading designs, we've crafted a dual-theme system that elevates our calculator from functional to visually compelling.
+
+### Primary Design Inspirations
+
+#### 1. **Obriy Sarmat** - Dark Theme Foundation
+**Source**: https://www.obriy.design/projects/sarmat
+**Aesthetic Philosophy**: Sophisticated minimalism with technical precision
+
+**Key Insights Applied**:
+- **Restricted Color Palette**: Professional authority through visual restraint
+- **Technical Typography**: Monospace fonts for numerical data enhance credibility
+- **Deep Black Base**: `oklch(0.11 0 0)` creates sophisticated foundation
+- **Strategic Green Accents**: Financial growth symbolism with precise application
+- **Data-Driven Layout**: Clean, modular organization supporting analytical tools
+
+**Implementation in Our Design**:
+```css
+/* Dark Theme - Obriy Sarmat Inspired */
+--background: oklch(0.11 0 0);           /* Deep professional black */
+--card: oklch(0.15 0 0);                 /* Charcoal cards */
+--primary: oklch(0.65 0.12 240);         /* Vibrant blue accent */
+```
+
+#### 2. **Apollo Studio** - Advanced Visual Effects
+**Source**: https://apollostudio.design/
+**Aesthetic Philosophy**: Glassmorphism and sophisticated depth
+
+**Key Insights Applied**:
+- **Complex Gradients**: Multi-dimensional color blending for visual depth
+- **Backdrop Filters**: `blur(20px) saturate(180%)` for modern glassmorphism
+- **Translucent Overlays**: Professional depth without overwhelming content
+- **Generous Spacing**: 120px padding for breathing room and luxury feel
+- **Modern Interactions**: Reduced opacity (0.7) and smooth transitions
+
+**Technical Implementation**:
+```css
+/* Apollo-Inspired Effects */
+.glass-element {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-accent {
+  background: linear-gradient(210deg, #7de1ff 0%, #4642d4 25%, #7a428c 75%, #333 100%);
+}
+```
+
+#### 3. **Signal Website** - Light Theme Trust
+**Source**: https://dribbble.com/shots/23453612-Signal-Website
+**Aesthetic Philosophy**: Clean professionalism with trust-building elements
+
+**Key Insights Applied**:
+- **Pure White Foundation**: `oklch(0.99 0 0)` for maximum cleanliness
+- **Financial Trust Blue**: `oklch(0.46 0.08 240)` for professional reliability
+- **Generous Whitespace**: Reduces cognitive load for complex financial data
+- **Subtle Shadows**: Light depth without distraction
+- **Progressive Disclosure**: Step-by-step information revelation
+
+**Light Theme Color System**:
+```css
+/* Signal-Inspired Light Theme */
+--background: oklch(0.99 0 0);           /* Pure white */
+--foreground: oklch(0.15 0 0);           /* Deep charcoal text */
+--primary: oklch(0.46 0.08 240);         /* Professional blue */
+--border: oklch(0.9 0 0);                /* Light borders */
+```
+
+#### 4. **MOYO Echo Hero** - Modern Typography & Layout (USER'S 2ND FAVORITE)
+**Source**: https://dribbble.com/shots/23559169-MOYO-New-update-for-Echo-Hero-Header-Builder
+**Aesthetic Philosophy**: Bold typography as primary visual element
+
+**Key Insights Applied**:
+- **Oversized Typography**: 48-72px hero titles for visual impact
+- **Geometric Minimalism**: Clean shapes supporting content hierarchy
+- **Modern Gradient Systems**: Multi-color blending for sophistication
+- **Component-Based Design**: Modular, reusable interface patterns
+- **Mobile-First Responsiveness**: 32-40px mobile scaling
+
+**Typography Scale Implementation**:
+```css
+/* MOYO-Inspired Typography */
+--text-4xl: 2.25rem;     /* 36px - Page headers */
+--text-5xl: 3rem;        /* 48px - Hero titles mobile */
+
+@media (min-width: 1024px) {
+  --text-5xl: 4.5rem;    /* 72px - Hero titles desktop */
+}
+```
+
+### Design System Implementation Strategy
+
+#### **Color Philosophy**
+- **60% Neutral Foundation**: Professional grays and whites for readability
+- **30% Brand Colors**: Trust-building blues and success greens
+- **10% Accent Colors**: Strategic use of vibrant elements for user guidance
+
+#### **Typography Hierarchy**
+```css
+/* Financial Interface Typography */
+--font-light: 300        /* Subtle helper text */
+--font-normal: 400       /* Body content */
+--font-medium: 500       /* Input labels */
+--font-semibold: 600     /* Card headers */
+--font-bold: 700         /* Important numbers */
+--font-extrabold: 800    /* Hero statements */
+```
+
+#### **Spacing System**
+Based on 8px base unit for mathematical precision:
+```css
+--space-2: 0.5rem    /* 8px - Tight spacing */
+--space-4: 1rem      /* 16px - Standard spacing */
+--space-6: 1.5rem    /* 24px - Section spacing */
+--space-8: 2rem      /* 32px - Large sections */
+--space-12: 3rem     /* 48px - Major divisions */
+--space-16: 4rem     /* 64px - Page sections */
+```
+
+#### **Component Design Patterns**
+
+**Financial Card Design**:
+```css
+.financial-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;           /* Modern, friendly curves */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: var(--space-6);
+  transition: all 0.2s ease;
+}
+
+.financial-card:hover {
+  transform: translateY(-2px);   /* Subtle lift on interaction */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+```
+
+**Trust-Building Button Hierarchy**:
+```css
+/* Primary CTA - Financial Actions */
+.btn-primary {
+  background: linear-gradient(90deg, var(--primary) 0%, oklch(0.4 0.1 240) 100%);
+  color: var(--primary-foreground);
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+/* Secondary - Alternative Actions */
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+}
+```
+
+### Aesthetic Principles for Financial Interfaces
+
+#### **Trust Through Design**
+1. **Consistent Visual Language**: Every element follows the same design rules
+2. **Professional Polish**: Subtle animations and perfect spacing
+3. **Data Clarity**: Monospace fonts for all numerical displays
+4. **Progressive Disclosure**: Complex information revealed step-by-step
+5. **Accessibility First**: High contrast ratios and keyboard navigation
+
+#### **Modern Sophistication**
+1. **Glassmorphism Effects**: Backdrop filters for depth without distraction
+2. **Intelligent Color Use**: Strategic accent colors guide user attention
+3. **Typography as Design**: Large, bold headings create visual hierarchy
+4. **Micro-Interactions**: Smooth hover states and focus indicators
+5. **Responsive Excellence**: Mobile-first with desktop enhancements
+
+#### **Financial Industry Standards**
+1. **Blue Color Dominance**: Professional trust and reliability
+2. **Clean Data Presentation**: Clear numerical displays with proper formatting
+3. **Card-Based Layout**: Information grouped in digestible sections
+4. **Minimal Cognitive Load**: Generous whitespace and clear hierarchy
+5. **Security Indicators**: Visual cues for data protection and accuracy
+
+### Implementation Guidelines
+
+#### **Theme Switching Strategy**
+- **Light Theme**: Default for broad accessibility and professional appearance
+- **Dark Theme**: Premium option for reduced eye strain and modern appeal
+- **Seamless Transitions**: Smooth switching without layout shifts
+- **System Respect**: Honor user's OS preference by default
+
+#### **Component Enhancement Priority**
+1. **Hero Section**: MOYO-inspired bold typography and clean layout
+2. **Calculator Forms**: Signal-inspired clean inputs with generous spacing
+3. **Result Cards**: Apollo-inspired glassmorphism with clear data hierarchy
+4. **Navigation**: Minimal, professional with consistent hover states
+
+#### **Visual Effects Guidelines**
+- **Gradients**: Subtle, purposeful, never overwhelming
+- **Shadows**: Light, natural depth enhancement
+- **Animations**: Smooth, functional, under 300ms duration
+- **Borders**: Consistent radius (12-16px) for modern feel
+
+This design system transforms our functional FHA calculator into a visually sophisticated application that builds user trust through professional aesthetics while maintaining the clarity and usability essential for financial tools.
+
 ## Feature Implementation Details
 
 ### Feature 1: Location, Tax & Rate Calculation

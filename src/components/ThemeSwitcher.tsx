@@ -25,8 +25,6 @@ export function ThemeSwitcher() {
   const options = [
     { value: "light", label: "Light" },
     { value: "dark", label: "Dark" },
-    { value: "steel", label: "Steel" },
-    { value: "prismatic", label: "Prismatic" },
   ];
 
   return (
