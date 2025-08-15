@@ -5,8 +5,14 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Google],
   callbacks: {
     async redirect({ redirectTo }) {
-      // Always ensure we return a safe, absolute URL on our app domain
-      const siteUrl = process.env.SITE_URL || "https://moneyheavenclaude.vercel.app";
+      // Environment-aware redirect logic
+      const defaultUrl =
+        process.env.VERCEL_ENV === "production"
+          ? "https://moneyheavenclaude.vercel.app"
+          : process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000";
+      const siteUrl = process.env.SITE_URL || defaultUrl;
       const fallbackPath = "/calculator";
       try {
         const base = new URL(siteUrl);
