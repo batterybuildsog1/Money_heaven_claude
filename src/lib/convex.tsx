@@ -5,7 +5,7 @@ import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
 
 // eslint-disable-next-line no-console
 try {
-  console.debug("MH:convex:url", { url: process.env.NEXT_PUBLIC_CONVEX_URL });
+  console.debug("MH:convex:url", { client: process.env.NEXT_PUBLIC_CONVEX_URL, server: process.env.CONVEX_URL });
 } catch {}
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {

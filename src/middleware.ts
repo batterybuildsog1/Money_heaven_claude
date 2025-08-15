@@ -24,11 +24,13 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
       isAuthenticated,
       cookies: cookieNames.slice(0, 12),
       env: {
-        convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ? "set" : "missing",
+        convexUrlClient: process.env.NEXT_PUBLIC_CONVEX_URL ? "set" : "missing",
+        convexUrlServer: process.env.CONVEX_URL ? "set" : "missing",
         googleClientId: !!process.env.GOOGLE_CLIENT_ID,
         googleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
         jwks: !!process.env.JWKS,
         jwtPrivateKey: !!process.env.JWT_PRIVATE_KEY,
+        authOrigin: process.env.AUTH_ORIGIN || "(unset)",
       },
     });
   } catch (e) {

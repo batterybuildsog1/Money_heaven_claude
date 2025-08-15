@@ -17,7 +17,9 @@ export default function Home() {
       // eslint-disable-next-line no-console
       console.debug('MH:home:mount', {
         env: {
-          convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ? 'set' : 'missing'
+          convexUrlClient: process.env.NEXT_PUBLIC_CONVEX_URL ? 'set' : 'missing',
+          convexUrlServer: process.env.CONVEX_URL ? 'set' : 'missing',
+          authOrigin: process.env.AUTH_ORIGIN || '(unset)'
         }
       });
     } catch {}
